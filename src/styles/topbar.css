@@ -42,3 +42,8 @@
    -ms-border-radius: 50%;
    -o-border-radius: 50%;
 }
+
+/* Chỉnh sửa lại width ở hover avatar */
+.hover-avatar {
+  width: 250px;
+}

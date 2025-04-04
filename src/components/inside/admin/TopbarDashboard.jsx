@@ -28,25 +28,31 @@ const TopbarDashboard = () => {
                 />
               </div>
 
-              <div class="invisible absolute right-0 z-20 mt-2 w-48 flex flex-col bg-white rounded-lg py-2 shadow-lg group-hover:visible">
-                <a
-                  href="#"
-                  class="text-drop-topbar font-lexend px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  Hồ sơ cá nhân
-                </a>
-                <a
-                  href="#"
-                  class="text-drop-topbar font-lexend px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  Lịch trình cá nhân
-                </a>
-                <a
-                  href="#"
-                  class="text-drop-topbar font-lexend px-4 py-2 text-red-500 hover:bg-gray-100"
-                >
-                  Đăng suất
-                </a>
+              <div class="invisible absolute right-0 z-20 mt-2 flex flex-col bg-white rounded-lg py-2 shadow-lg group-hover:visible hover-avatar">
+                <div className="flex items-center hover-avatar hover:bg-gray-100">
+                  <div className="ml-5"><img src="/images/icon-web/user-96.png" alt="profile" width={30} height={30}/></div>
+                  <a
+                    href="#"
+                    class="text-drop-topbar font-lexend px-4 py-2 text-gray-700">
+                    Hồ sơ cá nhân
+                  </a>
+                </div>
+                <div className="flex items-center hover-avatar hover:bg-gray-100">
+                  <div className="ml-5"><img src="/images/icon-web/schedule-96.png" alt="schedule" width={30} height={30} /></div>                  
+                  <a
+                    href="#"
+                    class="text-drop-topbar font-lexend px-4 py-2 text-gray-700">
+                    Lịch trình cá nhân
+                  </a>
+                </div>
+                <div className="flex items-center hover-avatar hover:bg-gray-100">
+                  <div className="ml-5"><img src="/images/icon-web/logout-96.png" alt="logout" width={30} height={30} /></div>                  
+                  <a
+                    href="#"
+                    class="text-drop-topbar font-lexend px-4 py-2 text-red-500">
+                    Đăng xuất
+                  </a>
+                </div>
               </div>
             </div>
           </div>

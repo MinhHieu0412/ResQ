@@ -22,12 +22,12 @@ const HeaderNavigation = () => {
         <li className="" style={{ width: '375px' }}>
           <div className="flex items-center justify-between font-lexend font-medium">
             <div className="flex items-center flex-row gap-3 bg-blue-013171 p-3 rounded-full" style={{ height: '40px' }}>
-              <div><img src="/images/icon-web/Settings.png" alt="phone" width={20} height={22} /></div>
+              <div><img src="/images/icon-web/Ringer Volume.png" alt="phone" width={20} height={22} /></div>
               <p className="text-sm text-white">(+84) 656 5565 7777</p>
             </div>
             <div className="flex items-center flex-row gap-3">
-              <div><img src="/images/icon-web/Settings.png" alt="avatar" width={27} height={28} /></div>
-              <Link to="/path" className="text-xl text-blue-013171">Đăng nhập</Link>
+              <div><img src="/images/icon-web/Person.png" alt="avatar" width={27} height={28} /></div>
+              <Link to="/login" className="text-xl text-blue-013171">Đăng nhập</Link>
             </div>
           </div>
         </li>                        

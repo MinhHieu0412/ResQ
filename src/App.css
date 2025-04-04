@@ -40,3 +40,11 @@
 .read-the-docs {
   color: #888;
 } */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
