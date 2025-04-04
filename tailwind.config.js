@@ -12,6 +12,11 @@ export default {
         manrope: ["Manrope", "sans-serif"], // Manrope font
         raleway: ["Raleway", "sans-serif"], // Raleway font
       },
+      colors: { // Define color set
+        'black-100e0e': '#100e0e',
+        'red-bb0000': '#bb0000',
+        'blue-013171': '#013171'
+      }
     },
   },
   plugins: [],
