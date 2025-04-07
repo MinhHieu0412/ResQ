@@ -3,7 +3,6 @@
 @tailwind utilities;
 
 .w-topbar{
-   height: 90px;
    height: 12vh;
    background-color: white;
 }

@@ -20,9 +20,11 @@ const TopbarDashboard = () => {
               className="noti-icon me-5"
             />
           </button>
+          {/* <img
+            src="images/icon-web/Person Calendar.png"
             alt="back-icon"
-            className="noti-icon me-7"
-          />
+            className="noti-icon me-5"
+          /> */}
           <div class=" flex items-center justify-center py-20">
             <div class="group relative cursor-pointer py-2">
               <div class="flex items-center space-x-3  px-4 py-2 ">
@@ -56,8 +58,6 @@ const TopbarDashboard = () => {
             </div>
           </div>
 
-          <img
-            src="images/icon-web/Settings.png"
           <button>
             <img
               src="images/icon-web/Settings.png"
@@ -65,10 +65,11 @@ const TopbarDashboard = () => {
               className="noti-icon me-5"
             />
           </button>
+          {/* <img
+            src="images/icon-web/logout.png"
             alt="back-icon"
-            className="noti-icon"
-          />
-          <img />
+            className="logout-icon"
+          /> */}
         </div>
       </div>
     </div>
