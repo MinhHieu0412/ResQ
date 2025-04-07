@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import "../../../styles/sidebar_dashboard.css";
 
 const SidebarDashboard = () => {
+const SidebarDashboard = ({ setActiveComponent }) => {
   // State to track the active button
   const [activeButton, setActiveButton] = useState("dashboard");
 
   // Function to handle button click and change active button
   const handleButtonClick = (buttonId) => {
     setActiveButton(buttonId); // Set the active button
+    setActiveComponent(buttonId);
   };
   return (
     <div className="w-full border-sidebar">
@@ -86,6 +88,8 @@ const SidebarDashboard = () => {
                 activeButton === "report"
                   ? "/images/icon-web/High Importance1.png"
                   : "/images/icon-web/High Importance.png"
+                  ? "/images/icon-web/icons8-high-importance-50-818181.png"
+                  : "/images/icon-web/icons8-high-importance-50.png"
               }
               alt="item-logo-sidebar"
               className="img-icon-small"

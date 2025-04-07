@@ -13,8 +13,13 @@ const TopbarDashboard = () => {
       </button>
       <div className="flex justify-center items-center me-8 w-right-topbar">
         <div className="flex justify-between items-center">
-          <img
-            src="images/icon-web/Alarm.png"
+          <button>
+            <img
+              src="images/icon-web/Alarm.png"
+              alt="back-icon"
+              className="noti-icon me-5"
+            />
+          </button>
             alt="back-icon"
             className="noti-icon me-7"
           />
@@ -53,6 +58,13 @@ const TopbarDashboard = () => {
 
           <img
             src="images/icon-web/Settings.png"
+          <button>
+            <img
+              src="images/icon-web/Settings.png"
+              alt="back-icon"
+              className="noti-icon me-5"
+            />
+          </button>
             alt="back-icon"
             className="noti-icon"
           />

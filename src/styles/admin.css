@@ -7,5 +7,6 @@
 }
 .all-content-admin{
  background-color:  rgba(176, 176, 176, 0.1);
+ min-height: 160vh;
  ;
 }
