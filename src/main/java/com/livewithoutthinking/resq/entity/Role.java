@@ -1,7 +1,9 @@
 package com.livewithoutthinking.resq.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import java.util.List;
 
 @Entity
 @Data
@@ -16,5 +18,8 @@ public class Role {
     @Column(name = "RoleName", nullable = false, unique = true)
     private String roleName;  // RoleName là VARCHAR(50)
 
-    // Constructor, Getters, Setters and other methods if needed
+    // Một Role có nhiều User
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
+    @JsonBackReference
+    private List<User> users;
 }

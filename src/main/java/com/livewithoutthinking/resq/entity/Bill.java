@@ -2,6 +2,7 @@ package com.livewithoutthinking.resq.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.Date;
 
 @Entity
@@ -10,25 +11,26 @@ import java.util.Date;
 public class Bill {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "BillID")
-    private String billId; // BillID là VARCHAR(36)
+    private int billId; 
 
     @ManyToOne
     @JoinColumn(name = "RRID", referencedColumnName = "RRID")
     private RequestRescue requestRescue; // Liên kết với bảng RequestRescue
 
-    @Column(name = "TypePrice")
-    private double typePrice; // Giá dịch vụ theo loại
-
+    @Column(name = "ServicePrice")
+    private double servicePrice; // Giá dịch vụ
+    
     @Column(name = "DistancePrice")
     private double distancePrice; // Giá dịch vụ theo khoảng cách
 
     @Column(name = "ExtraPrice")
     private double extraPrice; // Giá dịch vụ phụ (nếu có)
 
-    @Column(name = "Total")
-    private double total; // Tổng số tiền cần thanh toán
-
+    @Column(name = "TotalPrice")
+    private double totalPrice; // Tổng số tiền cần thanh toán
+    
     @ManyToOne
     @JoinColumn(name = "PaymentID", referencedColumnName = "PaymentID")
     private Payment payment; // Liên kết với bảng Payment
@@ -39,14 +41,20 @@ public class Bill {
     @Column(name = "PLocation")
     private String pLocation; // Vị trí của đối tác
 
-    @Column(name = "ServicePrice")
-    private double servicePrice; // Giá dịch vụ
-
-    @Column(name = "DiscountPrice")
-    private double discountPrice; // Giá đã được giảm
+    @Column(name = "AppFee")
+    private double appFee; // Giá dịch vụ theo loại
 
     @Column(name = "DiscountAmount")
     private double discountAmount; // Số tiền giảm
+    
+    @Column(name = "Total")
+    private double total; // Giá đã được giảm
+
+    @Column(name = "Method")
+    private String method;
+
+    @Column(name = "Status")
+    private String status;
 
     @Column(name = "Created_at", updatable = false)
     @Temporal(TemporalType.TIMESTAMP)

@@ -2,6 +2,7 @@ package com.livewithoutthinking.resq.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.Date;
 
 @Entity
@@ -10,8 +11,9 @@ import java.util.Date;
 public class RequestRescue {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "RRID")
-    private String rrid; // RRID là VARCHAR(36)
+    private int rrid; 
 
     @ManyToOne
     @JoinColumn(name = "PartnerID", referencedColumnName = "PartnerID", nullable = false)

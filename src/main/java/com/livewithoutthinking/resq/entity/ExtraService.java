@@ -9,8 +9,9 @@ import lombok.Data;
 public class ExtraService {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ExtraServiceID")
-    private String extraServiceId; // ExtraServiceID là VARCHAR(36)
+    private int extraServiceId; 
 
     @Column(name = "Reason")
     private String reason; // Lý do yêu cầu dịch vụ phụ

@@ -1,20 +1,28 @@
 package com.livewithoutthinking.resq.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
 @Table(name = "users")
 public class User {
 
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UserID")
-    private String userId;  // UserID là VARCHAR(36)
+    private Integer userId;
 
     @Column(name = "Username", nullable = false, unique = true)
     private String username;
+
+    @Column(name = "FullName", nullable = false, unique = true)
+    private String fullname;
 
     @Column(name = "Password", nullable = false)
     private String password;
@@ -22,10 +30,7 @@ public class User {
     @Column(name = "Email", unique = true)
     private String email;
 
-    @Column(name = "EmailVerified")
-    private boolean emailVerified;
-
-    @Column(name = "SDT")
+    @Column(name = "SDT", nullable = false, unique = true)
     private String sdt; // Phone number
 
     @Column(name = "Status")
@@ -34,15 +39,8 @@ public class User {
     @Column(name = "LoginFails")
     private int loginFails;
 
-    @Column(name = "WorkingStatus")
-    private String workingStatus;
-
     @Column(name = "DOB")
     private Date dob; // Date of Birth
-
-    @ManyToOne
-    @JoinColumn(name = "RoleID", referencedColumnName = "RoleID")
-    private Role role; // Reference to the Role table, assuming there's a Role class
 
     @Column(name = "Gender")
     private String gender;
@@ -50,12 +48,9 @@ public class User {
     @Column(name = "Address")
     private String address;
 
-    @Column(name = "EmailVerificationToken")
-    private String emailVerificationToken;
-
-    @Column(name = "EmailVerificationExpire")
-    private Date emailVerificationExpire;
-
+    @Column(name = "avatar")
+    private String avatar;
+    
     @Column(name = "PhoneVerified")
     private boolean phoneVerified;
 
@@ -92,5 +87,18 @@ public class User {
     @Column(name = "LoyaltyPoint")
     private int loyaltyPoint;
 
+    @ManyToOne
+    @JoinColumn(name = "RoleID", referencedColumnName = "RoleID")
+    @JsonManagedReference
+    private Role role;
+
+    public User() {
+    }
+    public User(Integer userId) {
+        this.userId = userId;
+    }
+
+
     // Constructor, Getters, Setters and other methods
 }
+

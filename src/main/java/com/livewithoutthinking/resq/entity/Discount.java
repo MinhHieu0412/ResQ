@@ -2,6 +2,7 @@ package com.livewithoutthinking.resq.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -11,14 +12,15 @@ import java.util.Date;
 public class Discount {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "DiscountID")
-    private String discountId; // DiscountID là VARCHAR(36)
+    private int discountId; 
 
     @Column(name = "Amount", nullable = false)
     private BigDecimal amount; // Số tiền giảm giá
 
     @Column(name = "Type", nullable = false)
-    private String type; // Loại giảm giá (ví dụ: "Phần trăm", "Số tiền cố định")
+    private String type; // Loại giảm giá ( Money / Percent )
 
     @Column(name = "Quantity", nullable = false)
     private int quantity; // Số lượng giảm giá còn lại

@@ -2,6 +2,7 @@ package com.livewithoutthinking.resq.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -11,8 +12,9 @@ import java.util.Date;
 public class RefundRequest {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "RefundID")
-    private String refundId; // RefundID là VARCHAR(36)
+    private int refundId; 
 
     @ManyToOne
     @JoinColumn(name = "RRID", referencedColumnName = "RRID", nullable = false)

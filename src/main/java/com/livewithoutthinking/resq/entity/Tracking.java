@@ -2,8 +2,8 @@ package com.livewithoutthinking.resq.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.Type;
-import org.locationtech.jts.geom.Point;  // Sử dụng JTS Geometry library
+import org.locationtech.jts.geom.Point;
+
 import java.util.Date;
 
 @Entity

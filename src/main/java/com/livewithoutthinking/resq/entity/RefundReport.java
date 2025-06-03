@@ -2,6 +2,7 @@ package com.livewithoutthinking.resq.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.Date;
 
 @Entity
@@ -10,8 +11,9 @@ import java.util.Date;
 public class RefundReport {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "RefundReportID")
-    private String refundReportId; // RefundReportID là VARCHAR(36)
+    private int refundReportId; 
 
     @ManyToOne
     @JoinColumn(name = "StaffID", referencedColumnName = "StaffID", nullable = false)

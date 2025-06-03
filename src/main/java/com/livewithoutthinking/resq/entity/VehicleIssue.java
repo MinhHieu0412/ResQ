@@ -9,8 +9,9 @@ import lombok.Data;
 public class VehicleIssue {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "IssueID")
-    private String issueId; // IssueID là VARCHAR(36)
+    private int issueId; 
 
     @Column(name = "Name", nullable = false)
     private String name; // Tên sự cố
