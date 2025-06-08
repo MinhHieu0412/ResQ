@@ -39,6 +39,7 @@ public class SecurityConffig {
     SecurityFilterChain api(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(au -> au
+                                .requestMatchers("/ws/**").permitAll()
                                 .requestMatchers("/api/resq/register", "/api/resq/login").permitAll()
                                 .requestMatchers("/api/resq/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/api/resq/manager/**").hasRole("MANAGER")
