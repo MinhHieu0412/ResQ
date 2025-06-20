@@ -9,8 +9,9 @@ import lombok.Data;
 public class ExtraServiceDetail {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ESDetailID")
-    private String esDetailId; // ESDetailID là VARCHAR(36)
+    private int esDetailId; 
 
     @ManyToOne
     @JoinColumn(name = "ExtraServiceID", referencedColumnName = "ExtraServiceID", nullable = false)

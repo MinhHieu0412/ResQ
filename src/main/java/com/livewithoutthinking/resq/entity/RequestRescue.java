@@ -10,8 +10,9 @@ import java.util.Date;
 public class RequestRescue {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "RRID")
-    private String rrid; // RRID là VARCHAR(36)
+    private Integer rrid;
 
     @ManyToOne
     @JoinColumn(name = "PartnerID", referencedColumnName = "PartnerID", nullable = false)

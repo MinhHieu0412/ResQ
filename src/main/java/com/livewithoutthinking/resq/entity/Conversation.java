@@ -10,8 +10,9 @@ import java.util.Date;
 public class Conversation {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ConversationID")
-    private String conversationId; // ConversationID là VARCHAR(36)
+    private int conversationId; 
 
     @ManyToOne
     @JoinColumn(name = "ContactType", referencedColumnName = "ContactID")

@@ -2,6 +2,8 @@ package com.livewithoutthinking.resq.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -10,8 +12,9 @@ import java.util.Date;
 public class Documentary {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "DocumentID")
-    private String documentId; // DocumentID là VARCHAR(36)
+    private int documentId; 
 
     @ManyToOne
     @JoinColumn(name = "PartnerID", referencedColumnName = "PartnerID")
@@ -29,6 +32,11 @@ public class Documentary {
 
     @Column(name = "DocumentImage")
     private String documentImage; // Đường dẫn hoặc URL tới hình ảnh giấy tờ
+
+    @Column(name = "DocumentStatus")
+    private String documentStatus;
+    @Column(name = "expiry_date")
+    private LocalDate expiryDate;  // dùng java.time.LocalDate cho kiểu DATE
 
     @Column(name = "Created_at", updatable = false)
     @Temporal(TemporalType.TIMESTAMP)

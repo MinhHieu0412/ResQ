@@ -9,8 +9,9 @@ import lombok.Data;
 public class PersonalData {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PDID")
-    private String pdId;  // PDID là VARCHAR(36)
+    private int pdId;  
 
     @Column(name = "CitizenNumber", nullable = false, unique = true)
     private String citizenNumber;  // CitizenNumber là VARCHAR(20)

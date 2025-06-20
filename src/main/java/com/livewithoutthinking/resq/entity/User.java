@@ -3,6 +3,7 @@ package com.livewithoutthinking.resq.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -10,8 +11,9 @@ import java.util.Date;
 public class User {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "UserID")
-    private String userId;  // UserID là VARCHAR(36)
+    private Integer userId;
 
     @Column(name = "Username", nullable = false, unique = true)
     private String username;
@@ -19,13 +21,13 @@ public class User {
     @Column(name = "Password", nullable = false)
     private String password;
 
+    @Column (name = "FullName")
+    private String fullName;
+
     @Column(name = "Email", unique = true)
     private String email;
 
-    @Column(name = "EmailVerified")
-    private boolean emailVerified;
-
-    @Column(name = "SDT")
+    @Column(name = "SDT", nullable = false, unique = true)
     private String sdt; // Phone number
 
     @Column(name = "Status")
@@ -34,28 +36,15 @@ public class User {
     @Column(name = "LoginFails")
     private int loginFails;
 
-    @Column(name = "WorkingStatus")
-    private String workingStatus;
-
     @Column(name = "DOB")
     private Date dob; // Date of Birth
-
-    @ManyToOne
-    @JoinColumn(name = "RoleID", referencedColumnName = "RoleID")
-    private Role role; // Reference to the Role table, assuming there's a Role class
 
     @Column(name = "Gender")
     private String gender;
 
     @Column(name = "Address")
     private String address;
-
-    @Column(name = "EmailVerificationToken")
-    private String emailVerificationToken;
-
-    @Column(name = "EmailVerificationExpire")
-    private Date emailVerificationExpire;
-
+    
     @Column(name = "PhoneVerified")
     private boolean phoneVerified;
 
@@ -92,5 +81,11 @@ public class User {
     @Column(name = "LoyaltyPoint")
     private int loyaltyPoint;
 
+    @ManyToOne
+    @JoinColumn(name = "RoleID")
+    private Role role;
     // Constructor, Getters, Setters and other methods
+
+    @OneToMany(mappedBy = "user")
+    private List<Report> reports;
 }

@@ -3,6 +3,7 @@ package com.livewithoutthinking.resq.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -10,10 +11,11 @@ import java.util.Date;
 public class Payment {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PaymentID")
-    private String paymentId; // PaymentID là VARCHAR(36)
+    private int paymentId; 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UserID", referencedColumnName = "UserID")
     private User user; // Liên kết với bảng Users
 
@@ -45,4 +47,12 @@ public class Payment {
     @Column(name = "Updated_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt; // Thời gian cập nhật
+
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "partner_id")
+//    private Partner partner;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "BillID", referencedColumnName = "BillID")
+    private Bill bill;
 }

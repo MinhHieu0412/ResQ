@@ -10,11 +10,12 @@ import java.util.Date;
 public class Services {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ServiceID")
-    private String serviceId; // ServiceID là VARCHAR(36)
+    private Integer serviceId;
 
     @Column(name = "ServiceType", nullable = false)
-    private String serviceType; // Phân loại dịch vụ (TowTruck, Onsite, AssistDriver)
+    private String serviceType; // Phân loại dịch vụ (ResFix, ResTow, ResDrive)
 
     @Column(name = "ServiceName", nullable = false)
     private String serviceName; // Tên dịch vụ

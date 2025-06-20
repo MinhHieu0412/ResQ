@@ -10,8 +10,9 @@ import java.util.Date;
 public class RescueHistory {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "RRHistoryID")
-    private String rrHistoryId; // RRHistoryID là VARCHAR(36)
+    private Integer rrHistoryId;
 
     @ManyToOne
     @JoinColumn(name = "RRID", referencedColumnName = "RRID", nullable = false)

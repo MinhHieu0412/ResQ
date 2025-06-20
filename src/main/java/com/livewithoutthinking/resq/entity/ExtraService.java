@@ -9,8 +9,9 @@ import lombok.Data;
 public class ExtraService {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ExtraServiceID")
-    private String extraServiceId; // ExtraServiceID là VARCHAR(36)
+    private int extraServiceId; 
 
     @Column(name = "Reason")
     private String reason; // Lý do yêu cầu dịch vụ phụ
@@ -27,6 +28,6 @@ public class ExtraService {
     private double price; // Giá của dịch vụ phụ
 
     @ManyToOne
-    @JoinColumn(name = "IssueID", referencedColumnName = "IssueID", nullable = true)
-    private VehicleIssue vehicleIssue; // Liên kết với bảng VehicleIssue (có thể NULL nếu không có sự cố)
+    @JoinColumn(name = "ServiceID", referencedColumnName = "ServiceID", nullable = true)
+    private Services services; // Liên kết với bảng VehicleIssue (có thể NULL nếu không có sự cố)
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -15,9 +16,12 @@ public class Schedule {
     @Column(name = "ScheduleID")
     private int scheduleId; // ScheduleID là INT và tự động tăng
 
-    @ManyToOne
-    @JoinColumn(name = "StaffID", referencedColumnName = "StaffID")
-    private Staff staff; // Liên kết với bảng Staff, thông qua StaffID
+    @Column(name = "Title")
+    private String title; // Tên sự kiện
+
+    @Column(name = "Date")
+    @Temporal(TemporalType.DATE)
+    private Date date; // Ngày làm việc
 
     @Column(name = "StartTime")
     private java.sql.Time startTime; // Thời gian bắt đầu
@@ -25,12 +29,30 @@ public class Schedule {
     @Column(name = "EndTime")
     private java.sql.Time endTime; // Thời gian kết thúc
 
-    @Column(name = "Date")
-    @Temporal(TemporalType.DATE)
-    private Date date; // Ngày làm việc
-
     @Column(name = "Status")
-    private String status; // Trạng thái công việc
+    private String status; // Trạng thái công việc (ví dụ: "Completed", "Pending")
+
+    @Column(name = "EventColor")
+    private String eventColor; // Màu sắc của sự kiện (để phân loại trên lịch)
+
+    @Column(name = "Description")
+    private String description; // Mô tả sự kiện
+
+    @Column(name = "IsRecurring")
+    private Boolean isRecurring; // Xác định nếu sự kiện là lặp lại
+
+    @Column(name = "RecurrenceType")
+    private String recurrenceType; // Loại chu kỳ lặp lại: "DAILY", "WEEKLY", "MONTHLY", "CUSTOM"
+
+    @Column(name = "RecurrenceInterval")
+    private Integer recurrenceInterval; // Số chu kỳ (ví dụ: lặp lại mỗi 2 tuần, mỗi tháng,...)
+
+    @Column(name = "RecurrenceDays")
+    private String recurrenceDays; // Các ngày lặp lại trong tuần, ví dụ: "MONDAY, WEDNESDAY, FRIDAY"
+
+    @Column(name = "RecurrenceEndDate")
+    @Temporal(TemporalType.DATE)
+    private Date recurrenceEndDate; // Ngày kết thúc chu kỳ (nếu có)
 
     @Column(name = "Created_at", updatable = false)
     @Temporal(TemporalType.TIMESTAMP)

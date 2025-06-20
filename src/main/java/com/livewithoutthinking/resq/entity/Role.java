@@ -3,6 +3,8 @@ package com.livewithoutthinking.resq.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Data
 @Table(name = "role")

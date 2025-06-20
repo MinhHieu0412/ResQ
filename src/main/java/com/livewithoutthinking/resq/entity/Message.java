@@ -19,8 +19,11 @@ public class Message {
     @JoinColumn(name = "ConversationID", referencedColumnName = "ConversationID")
     private Conversation conversation; // Liên kết với bảng Conversation
 
+    @Column(name = "SendID")
+    private boolean sendId; // Phân biệt người nào gửi tin nhắn. 0 là sender, 1 là recipient
+
     @Column(name = "Content")
-    private String content; // Nội dung tin nhắn
+    private String content; // Nội dung tin nhắn người đó gửi
 
     @Column(name = "Created_at", updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
