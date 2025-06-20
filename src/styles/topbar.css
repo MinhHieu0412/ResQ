@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 .w-topbar{
-   height: 90px;
+   height: 12vh;
    background-color: white;
 }
 .btn-back{
@@ -25,6 +25,10 @@
 
 .noti-icon{
    width: 40px;
+}
+
+.logout-icon{
+   height: 35px;
 }
 
 .text-drop-topbar{

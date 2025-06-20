@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import "../../../styles/sidebar_dashboard.css";
 
-const SidebarDashboard = () => {
+const SidebarDashboard = ({ setActiveComponent }) => {
   // State to track the active button
   const [activeButton, setActiveButton] = useState("dashboard");
 
   // Function to handle button click and change active button
   const handleButtonClick = (buttonId) => {
     setActiveButton(buttonId); // Set the active button
+    setActiveComponent(buttonId);
   };
   return (
     <div className="w-full border-sidebar">
@@ -84,8 +85,8 @@ const SidebarDashboard = () => {
             <img
               src={
                 activeButton === "report"
-                  ? "/images/icon-web/High Importance1.png"
-                  : "/images/icon-web/High Importance.png"
+                  ? "/images/icon-web/icons8-high-importance-50-818181.png"
+                  : "/images/icon-web/icons8-high-importance-50.png"
               }
               alt="item-logo-sidebar"
               className="img-icon-small"
@@ -95,7 +96,7 @@ const SidebarDashboard = () => {
                 activeButton === "report" ? "text-white" : "text-btn-sidebar"
               }`}
             >
-              Khiếu nại
+              Report
             </p>
           </button>
         </div>
@@ -126,7 +127,7 @@ const SidebarDashboard = () => {
                 activeButton === "staff" ? "text-white" : "text-btn-sidebar"
               }`}
             >
-              Nhân viên
+              Staff
             </p>
           </button>
 
@@ -151,7 +152,7 @@ const SidebarDashboard = () => {
                 activeButton === "manager" ? "text-white" : "text-btn-sidebar"
               }`}
             >
-              Quản lý
+              Manager
             </p>
           </button>
 
@@ -176,7 +177,7 @@ const SidebarDashboard = () => {
                 activeButton === "partner" ? "text-white" : "text-btn-sidebar"
               }`}
             >
-              Đối tác
+              Partner
             </p>
           </button>
         </div>
@@ -207,7 +208,7 @@ const SidebarDashboard = () => {
                 activeButton === "customer" ? "text-white" : "text-btn-sidebar"
               }`}
             >
-              Khách hàng
+              Customer
             </p>
           </button>
 
@@ -232,7 +233,7 @@ const SidebarDashboard = () => {
                 activeButton === "services" ? "text-white" : "text-btn-sidebar"
               }`}
             >
-              Dịch vụ cứu hộ
+              Rescue Services
             </p>
           </button>
 
@@ -257,7 +258,7 @@ const SidebarDashboard = () => {
                 activeButton === "resq" ? "text-white" : "text-btn-sidebar"
               }`}
             >
-              Yêu cầu cứu hộ
+              Request Rescue
             </p>
           </button>
         </div>
@@ -288,7 +289,7 @@ const SidebarDashboard = () => {
                 activeButton === "discount" ? "text-white" : "text-btn-sidebar"
               }`}
             >
-              Giảm giá
+              Discount
             </p>
           </button>
 
@@ -313,7 +314,7 @@ const SidebarDashboard = () => {
                 activeButton === "schedule" ? "text-white" : "text-btn-sidebar"
               }`}
             >
-              Lịch
+              Calender
             </p>
           </button>
         </div>
@@ -400,7 +401,7 @@ const SidebarDashboard = () => {
                 activeButton === "payment" ? "text-white" : "text-btn-sidebar"
               }`}
             >
-              Giao dịch
+              Payment
             </p>
           </button>
 
@@ -425,9 +426,36 @@ const SidebarDashboard = () => {
                 activeButton === "refund" ? "text-white" : "text-btn-sidebar"
               }`}
             >
-              Yêu cầu thanh toán
+              Request Refund
             </p>
           </button>
+
+          {/* Add Report */}
+          <button
+            className={`btn-sidebar mb-5 ${
+              activeButton === "add-report" ? "focus-btn" : ""
+            }`}
+            onClick={() => handleButtonClick("add-report")}
+          >
+            <img
+              src={
+                activeButton === "add-report"
+                  ? "/images/icon-web/Exchange Dollar.png"
+                  : "/images/icon-web/Exchange Dollar1.png"
+              }
+              alt="item-logo-sidebar"
+              className="img-icon-small"
+            />
+            <p
+              className={`font-lexend text-btn-sidebar ${
+                activeButton === "add-report" ? "text-white" : "text-btn-sidebar"
+              }`}
+            >
+              Add Report
+            </p>
+          </button>
+
+          
         </div>
       </div>
     </div>
