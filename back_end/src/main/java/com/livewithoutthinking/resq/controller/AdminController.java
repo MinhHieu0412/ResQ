@@ -118,14 +118,14 @@ public class AdminController {
             ObjectMapper mapper = new ObjectMapper();
             UserDto userDto = mapper.readValue(userDtoString, UserDto.class);
             Map<String, String> errors = validateUserDto(userDto);
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
+            }
             String existedMessage = userExists(userDto);
             if(existedMessage != null){
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
                         .body(ApiResponse.conflictData(null, existedMessage));
-            }
-            if (!errors.isEmpty()) {
-                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
             }
             Staff newStaff = staffSrv.createNew(userDto, avatar);
             return ResponseEntity.ok(newStaff);
@@ -182,14 +182,14 @@ public class AdminController {
             ObjectMapper mapper = new ObjectMapper();
             UserDto userDto = mapper.readValue(userDtoString, UserDto.class);
             Map<String, String> errors = validateUserDto(userDto);
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
+            }
             String existedMessage = userExists(userDto);
             if(existedMessage != null){
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
                         .body(ApiResponse.conflictData(null, existedMessage));
-            }
-            if (!errors.isEmpty()) {
-                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
             }
 
             Staff newManager = managerSrv.createNew(userDto, avatar);

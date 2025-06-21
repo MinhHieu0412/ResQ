@@ -66,6 +66,7 @@ const NewCustomer = ({ onBack }) => {
                 setIsSuccess(false); setTimeout(() => {
                     setIsRun(false);
                     setIsSuccess(false);
+                    setErrors({});
                 }, 3000);
             } else {
                 setIsRun(true);

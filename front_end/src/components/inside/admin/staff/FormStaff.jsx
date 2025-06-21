@@ -94,6 +94,7 @@ const FormStaff = ({ onBack, staff, isEdit }) => {
                 setIsRun(true);
                 setMessage(message);
                 setIsSuccess(false); setTimeout(() => {
+                    setErrors({});
                     setIsRun(false);
                     setIsSuccess(false);
                 }, 3000);

@@ -96,6 +96,7 @@ const FormManager = ({ onBack, manager, isEdit }) => {
                 setIsSuccess(false); setTimeout(() => {
                     setIsRun(false);
                     setIsSuccess(false);
+                    setErrors({});
                 }, 3000);
             } else {
                 setIsRun(true);
