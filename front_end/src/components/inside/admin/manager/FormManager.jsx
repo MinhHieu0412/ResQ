@@ -46,7 +46,7 @@ const FormManager = ({ onBack, manager, isEdit }) => {
             } else {
                 response = await managerAPI.createNew(newManager);
             }
-            if (response && response.data) {
+            if (response?.data) {
                 setIsRun(true);
                 setIsSuccess(true);
                 if (isEdit) {
@@ -85,34 +85,38 @@ const FormManager = ({ onBack, manager, isEdit }) => {
 
             }
         } catch (error) {
-            if (error.response && error.response.status === 400) {
-                const { message, errors } = error.response.data;
-                setMessage(message);
-                setErrors(errors);
-            } else if (error.response && error.response.status === 409) {
-                const { message } = error.response.data;
-                setIsRun(true);
-                setMessage(message);
-                setIsSuccess(false); setTimeout(() => {
-                    setIsRun(false);
-                    setIsSuccess(false);
-                    setErrors({});
-                }, 3000);
+                const res = error.response;
+                const status = res.status;
+            if (status === 400) {
+                setMessage(res.data);
+                setErrors(res.data);
+                console.log(res.data);
+            } else if (status === 409) {
+                const { message } = res.data;
+                showError(message);
+                console.log(res.data);
             } else {
-                setIsRun(true);
-                setIsSuccess(false);
+                let message;
                 if (isEdit) {
-                    setMessage("Update Manager Fail!");
+                    message = "Update Manager Fail!";
                 } else {
-                    setMessage("Create New Manager Fail!");
+                    message = "Create New Manager Fail!"
                 }
-                setIsSuccess(false); setTimeout(() => {
-                    setIsRun(false);
-                    setIsSuccess(false);
-                }, 3000);
+                showError(message);
             }
             console.log(error);
         }
+    };
+
+    const showError = (msg) => {
+        setIsRun(true);
+        setIsSuccess(false);
+        setMessage(msg);
+        setTimeout(() => {
+            setIsRun(false);
+            setIsSuccess(false);
+            setErrors({});
+        }, 3000);
     };
 
     const inputClass =

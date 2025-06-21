@@ -33,6 +33,8 @@ const NewCustomer = ({ onBack }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage(null);
+        setErrors({});
+        setIsRun(false);
 
         try {
             const newCustomer = new FormData();
@@ -40,44 +42,42 @@ const NewCustomer = ({ onBack }) => {
             newCustomer.append("userDtoString", JSON.stringify(dto));
             if (avatar) newCustomer.append("avatar", avatar);
             const response = await customerAPI.createNew(newCustomer);
-            if (response && response.data) {
+            if (response?.data) {
                 setIsRun(true);
                 setIsSuccess(true);
                 setMessage("Create New Customer Success!");
-                setTimeout(() => {
-                    onBack();
-                }, 3000);
+                setTimeout(onBack, 3000);
             } else {
-                setIsRun(true);
-                setIsSuccess(false);
-                setMessage("Create New Customer Fail!");
+                showError("Create New Customer Fail!");
 
             }
         } catch (error) {
-            if (error.response && error.response.status === 400) {
-                const { message, errors } = error.response.data;
-                setMessage(message);
-                setErrors(errors);
-                console.log(error.response.data);
-            } else if (error.response && error.response.status === 409) {
-                const { message } = error.response.data;
-                setIsRun(true);
-                setMessage(message);
-                setIsSuccess(false); setTimeout(() => {
-                    setIsRun(false);
-                    setIsSuccess(false);
-                    setErrors({});
-                }, 3000);
+                const res = error.response;
+                const status = res.status;
+            if (status === 400) {
+                setMessage(res.data);
+                setErrors(res.data);
+                console.log(res.data);
+            } else if (status === 409) {
+                const { message } = res.data;
+                showError(message);
+                console.log(res.data);
             } else {
-                setIsRun(true);
-                setIsSuccess(false);
-                setMessage("Create New Customer Fail!");
-                setIsSuccess(false); setTimeout(() => {
-                    setIsRun(false);
-                    setIsSuccess(false);
-                }, 3000);
+                showError("Create New Customer Fail!");
+                console.log(error);
             }
         }
+    };
+
+    const showError = (msg) => {
+        setIsRun(true);
+        setIsSuccess(false);
+        setMessage(msg);
+        setTimeout(() => {
+            setIsRun(false);
+            setIsSuccess(false);
+            setErrors({});
+        }, 3000);
     };
 
     const inputClass =
