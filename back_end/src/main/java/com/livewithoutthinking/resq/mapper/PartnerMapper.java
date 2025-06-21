@@ -1,0 +1,34 @@
+package com.livewithoutthinking.resq.mapper;
+
+import com.livewithoutthinking.resq.dto.PartnerDto;
+import com.livewithoutthinking.resq.entity.Partner;
+
+public class PartnerMapper {
+
+    public static PartnerDto toDTO(Partner partner) {
+        if (partner == null) return null;
+
+        PartnerDto dto = new PartnerDto();
+        dto.setPartnerId(partner.getPartnerId());
+
+        if (partner.getUser() != null) {
+            dto.setUsername(partner.getUser().getUsername());
+            dto.setFullName(partner.getUser().getFullName());
+            dto.setEmail(partner.getUser().getEmail());
+            dto.setSdt(partner.getUser().getSdt());
+            dto.setAddress(partner.getUser().getAddress());
+        }
+
+        dto.setResFix(partner.isResFix());
+        dto.setResTow(partner.isResTow());
+        dto.setResDrive(partner.isResDrive());
+        dto.setPartnerAddress(partner.getPartnerAddress());
+        dto.setVerificationStatus(partner.isVerificationStatus());
+        dto.setAvgTime(partner.getAvgTime());
+        dto.setCreatedAt(partner.getCreatedAt());
+        dto.setUpdatedAt(partner.getUpdatedAt());
+        dto.setStatus(partner.getUser().getStatus());
+        return dto;
+    }
+}
+
