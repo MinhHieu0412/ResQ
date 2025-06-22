@@ -33,8 +33,6 @@ const NewCustomer = ({ onBack }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage(null);
-        setErrors({});
-        setIsRun(false);
 
         try {
             const newCustomer = new FormData();
@@ -42,7 +40,7 @@ const NewCustomer = ({ onBack }) => {
             newCustomer.append("userDtoString", JSON.stringify(dto));
             if (avatar) newCustomer.append("avatar", avatar);
             const response = await customerAPI.createNew(newCustomer);
-            if (response?.data) {
+            if (response && response.data) {
                 setIsRun(true);
                 setIsSuccess(true);
                 setMessage("Create New Customer Success!");
@@ -52,33 +50,32 @@ const NewCustomer = ({ onBack }) => {
 
             }
         } catch (error) {
-                const res = error.response;
-                const status = res.status;
-            if (status === 400) {
-                setMessage(res.data);
-                setErrors(res.data);
-                console.log(res.data);
-            } else if (status === 409) {
-                const { message } = res.data;
-                showError(message);
-                console.log(res.data);
+            if (error.response && error.response.status === 400) {
+                const { message, errors } = error.response.data;
+                setMessage(message);
+                setErrors(errors);
+                console.log(error.response.data);
+            } else if (error.response && error.response.status === 409) {
+                const { message } = error.response.data;
+                setIsRun(true);
+                setMessage(message);
+                setIsSuccess(false); setTimeout(() => {
+                    setIsRun(false);
+                    setIsSuccess(false);
+                    setErrors({});
+                }, 3000);
             } else {
-                showError("Create New Customer Fail!");
-                console.log(error);
+                setIsRun(true);
+                setIsSuccess(false);
+                setMessage("Create New Customer Fail!");
+                setIsSuccess(false); setTimeout(() => {
+                    setIsRun(false);
+                    setIsSuccess(false);
+                }, 3000);
             }
-        }
-    };
+        };
+    }
 
-    const showError = (msg) => {
-        setIsRun(true);
-        setIsSuccess(false);
-        setMessage(msg);
-        setTimeout(() => {
-            setIsRun(false);
-            setIsSuccess(false);
-            setErrors({});
-        }, 3000);
-    };
 
     const inputClass =
         "w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#68A2F0] transition";

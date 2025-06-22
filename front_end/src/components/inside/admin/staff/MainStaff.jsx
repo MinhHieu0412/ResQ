@@ -161,7 +161,7 @@ const MainStaff = () => {
                   Response Time
                   <button onClick={() => toggleSort("response")}>
                     <img
-                      src={`/images/icon-web/Chevron ${sortField === "response" && sortOrder === "asc" ? "Down" : "Up"
+                      src={`/images/icon-web/Chevron ${sortField === "response" && sortOrder === "asc" ? "Up" : "Down"
                         }.png`}
                       className="h-3 ml-2 inline"
                       alt="Sort Response Time"

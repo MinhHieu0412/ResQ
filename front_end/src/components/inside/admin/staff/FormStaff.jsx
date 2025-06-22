@@ -31,12 +31,11 @@ const FormStaff = ({ onBack, staff, isEdit }) => {
     const [isRun, setIsRun] = useState(false);
     const [message, setMessage] = useState("");
     const [isSuccess, setIsSuccess] = useState(false);
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage(null);
-        setErrors({});
-        setIsRun(false);
-        
+
         try {
             const newStaff = new FormData();
             const { avatar, ...dto } = formData;
@@ -87,39 +86,35 @@ const FormStaff = ({ onBack, staff, isEdit }) => {
 
             }
         } catch (error) {
-            const res = error.response;
-            const status = res.status;
-            if (status === 400) {
-                setMessage(res.data);
-                setErrors(res.data);
-                console.log(res.data);
-            } else if (status === 409) {
-                const { message } = res.data;
-                showError(message);
-                console.log(res.data);
+            if (error.response && error.response.status === 400) {
+                const { message, errors } = error.response.data;
+                setMessage(message);
+                setErrors(errors);
+            } else if (error.response && error.response.status === 409) {
+                const { message } = error.response.data;
+                setIsRun(true);
+                setMessage(message);
+                setIsSuccess(false); setTimeout(() => {
+                    setErrors({});
+                    setIsRun(false);
+                    setIsSuccess(false);
+                }, 3000);
             } else {
-                let message;
+                setIsRun(true);
+                setIsSuccess(false);
                 if (isEdit) {
-                    message = "Update Staff Fail!";
+                    setMessage("Update Staff Fail!");
                 } else {
-                    message = "Create New Staff Fail!";
+                    setMessage("Create New Staff Fail!");
+                    setIsSuccess(false); setTimeout(() => {
+                        setIsRun(false);
+                        setIsSuccess(false);
+                    }, 3000);
+                    console.log(error);
                 }
-                showError(message);
-            }
-            console.log(error);
+            };
         }
-    };
-
-    const showError = (msg) => {
-        setIsRun(true);
-        setIsSuccess(false);
-        setMessage(msg);
-        setTimeout(() => {
-            setIsRun(false);
-            setIsSuccess(false);
-            setErrors({});
-        }, 3000);
-    };
+    }
 
     const inputClass =
         "w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#68A2F0] transition";

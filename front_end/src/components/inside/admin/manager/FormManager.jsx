@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { managerAPI } from "../../../../admin";
 
 const FormManager = ({ onBack, manager, isEdit }) => {
@@ -46,7 +46,7 @@ const FormManager = ({ onBack, manager, isEdit }) => {
             } else {
                 response = await managerAPI.createNew(newManager);
             }
-            if (response?.data) {
+            if (response && response.data) {
                 setIsRun(true);
                 setIsSuccess(true);
                 if (isEdit) {
@@ -85,44 +85,38 @@ const FormManager = ({ onBack, manager, isEdit }) => {
 
             }
         } catch (error) {
-                const res = error.response;
-                const status = res.status;
-            if (status === 400) {
-                setMessage(res.data);
-                setErrors(res.data);
-                console.log(res.data);
-            } else if (status === 409) {
-                const { message } = res.data;
-                showError(message);
-                console.log(res.data);
+            if (error.response && error.response.status === 400) {
+                const { message, errors } = error.response.data;
+                setMessage(message);
+                setErrors(errors);
+            } else if (error.response && error.response.status === 409) {
+                const { message } = error.response.data;
+                setIsRun(true);
+                setMessage(message);
+                setIsSuccess(false); setTimeout(() => {
+                    setIsRun(false);
+                    setIsSuccess(false);
+                    setErrors({});
+                }, 3000);
             } else {
-                let message;
+                setIsRun(true);
+                setIsSuccess(false);
                 if (isEdit) {
-                    message = "Update Manager Fail!";
+                    setMessage("Update Manager Fail!");
                 } else {
-                    message = "Create New Manager Fail!"
+                    setMessage("Create New Manager Fail!");
                 }
-                showError(message);
-            }
-            console.log(error);
+                setIsSuccess(false); setTimeout(() => {
+                    setIsRun(false);
+                    setIsSuccess(false);
+                }, 3000);
+            };
         }
-    };
-
-    const showError = (msg) => {
-        setIsRun(true);
-        setIsSuccess(false);
-        setMessage(msg);
-        setTimeout(() => {
-            setIsRun(false);
-            setIsSuccess(false);
-            setErrors({});
-        }, 3000);
-    };
-
+    }
+    
     const inputClass =
         "w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#68A2F0] transition";
     const labelClass = "font-medium text-gray-700";
-
     return (
         <div>
             <div className="pt-10 pl-20">
