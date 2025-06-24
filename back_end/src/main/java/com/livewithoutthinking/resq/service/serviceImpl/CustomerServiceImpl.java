@@ -87,9 +87,8 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     public User createNew(UserDto dto, MultipartFile avatar){
-        User newCus = new User();
         Role role = roleRepo.findByName("CUSTOMER");
-        newCus = UserMapper.toEntity(dto, encoder);
+        User newCus = UserMapper.toEntity(dto, encoder);
         newCus.setStatus("Waiting");
         newCus.setRole(role);
         newCus.setCreatedAt(new Date());
@@ -102,6 +101,12 @@ public class CustomerServiceImpl implements CustomerService {
         noti.setMessage("Welcome to ResQ! Your default password is $resQ2025" +
                 "We recommend changing it immediately to keep your account secure!");
         notificationRepo.save(noti);
+        try {
+            notificationRepo.save(noti);
+            System.out.println("Notification saved!");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return savedCus;
     }
