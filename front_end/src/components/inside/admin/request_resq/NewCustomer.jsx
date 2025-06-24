@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { customerAPI } from "../../../../admin";
 
-const NewCustomer = ({ onBack }) => {
+const NewCustomer = ({ onBack, onCustomerCreated }) => {
     const [errors, setErrors] = useState({});
     const [formData, setFormData] = useState({
         fullName: '',
@@ -44,7 +44,14 @@ const NewCustomer = ({ onBack }) => {
                 setIsRun(true);
                 setIsSuccess(true);
                 setMessage("Create New Customer Success!");
-                setTimeout(onBack, 3000);
+                setTimeout(() => {
+                    if (onCustomerCreated) {
+                        onCustomerCreated(response.data);
+                    }
+                    setIsRun(false);
+                    setIsSuccess(false);
+                    onBack();
+                }, 2500);
             } else {
                 showError("Create New Customer Fail!");
 
