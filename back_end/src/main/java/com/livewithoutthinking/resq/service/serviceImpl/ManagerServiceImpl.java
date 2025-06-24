@@ -126,7 +126,6 @@ public class ManagerServiceImpl implements ManagerService {
 
         Staff newManager = new Staff();
         newManager.setUser(newUser);
-        newManager.setPosition("Manager");
         newManager.setHiredDate(new Date());
         newManager.setAvgTime((float) 0.0);
         return managerRepo.save(newManager);

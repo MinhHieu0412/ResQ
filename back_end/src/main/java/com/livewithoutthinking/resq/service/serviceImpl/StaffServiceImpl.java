@@ -99,7 +99,6 @@ public class StaffServiceImpl implements StaffService {
 
         Staff newStaff = new Staff();
         newStaff.setUser(newUser);
-        newStaff.setPosition("Staff");
         newStaff.setHiredDate(new Date());
         newStaff.setAvgTime((float) 0.0);
         return staffRepo.save(newStaff);

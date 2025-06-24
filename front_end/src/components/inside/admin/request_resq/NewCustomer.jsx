@@ -9,7 +9,7 @@ const NewCustomer = ({ onBack }) => {
         sdt: '',
         email: '',
         address: '',
-        password: '',
+        password: '$resQ2025',
         avatar: '',
     });
 

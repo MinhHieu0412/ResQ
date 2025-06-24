@@ -43,7 +43,11 @@ public class UserServiceImpl {
             user.setAddress(dto.getAddress());
         }
         if(dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
-            user.setPassword(encoder.encode(dto.getPassword()));
+            if(!dto.getPassword().startsWith("$2a$")){
+                user.setPassword(encoder.encode(dto.getPassword()));
+            }else{
+                user.setPassword(dto.getPassword());
+            }
         }
 
         if (avatar != null && !avatar.isEmpty()) {

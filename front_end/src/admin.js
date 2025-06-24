@@ -71,7 +71,14 @@ export const reqResQsAPI = {
   findReqResQById: (rrId) => adminApi.get(`/reqResQs/${rrId}`), //Detail Request Rescue
   searchCustomer: (userId, keyword) => adminApi.get(`/reqResQs/searchWithUser/${userId}/${keyword}`),
   searchRequestResQ: (keyword) => adminApi.get(`/reqResQs/searchRequestResQ/${keyword}`),
-  relatedRecordCheck: (rrId) => adminApi.get(`/reqResQs/existedRecords/${rrId}`)
+  relatedRecordCheck: (rrId) => adminApi.get(`/reqResQs/existedRecords/${rrId}`),
+  createNew: (data) => adminApi.post('/reqResQs/createRequest', data),
+  updateRequest: (requestId, data) => adminApi.put(`/reqResQs/${requestId}`, data)
+}
+
+/*SERVICE*/
+export const serviceAPI = {
+  findBySrvType: (srvType) => adminApi.get(`/services/searchBySrvType/${srvType}`),
 }
 
 /*EXTRA SERVICE*/

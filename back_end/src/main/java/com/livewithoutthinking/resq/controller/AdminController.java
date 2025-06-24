@@ -2,25 +2,20 @@ package com.livewithoutthinking.resq.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.livewithoutthinking.resq.dto.*;
 import com.livewithoutthinking.resq.entity.*;
-import com.livewithoutthinking.resq.helpers.ApiResponse;
-import com.livewithoutthinking.resq.repository.UserRepository;
 import com.livewithoutthinking.resq.service.*;
 import com.livewithoutthinking.resq.service.PartnerService;
 import com.livewithoutthinking.resq.service.serviceImpl.UserServiceImpl;
-import jakarta.validation.*;
+import com.livewithoutthinking.resq.helpers.ApiResponse;
+import com.livewithoutthinking.resq.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/resq/admin")
@@ -45,19 +40,24 @@ public class AdminController {
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder encoder;
+    @Autowired
+    private SrvService serviceSrv;
 
     //==================FEEDBACK SECTION==================
     @GetMapping("/feedbacks")
     public ResponseEntity<List<FeedbackDto>> getFeedbacks() {
         return ok(feedbackSrv.findAll());    }
+
     @GetMapping("/feedbacks/searchFeedbackByRR/{rrId}")
     public ResponseEntity<FeedbackDto> searchFeedbackByRR(@PathVariable("rrId") int rrId) {
         return ok(feedbackSrv.searchByRRid(rrId));
     }
+
     @GetMapping("/feedbacks/searchFeedbackByPartner/{partnerId}")
     public ResponseEntity<List<FeedbackDto>> searchFeedbackByPartner(@PathVariable("partnerId") int partnerId) {
         return ok(feedbackSrv.searchByPartner(partnerId));
     }
+
     @GetMapping("/feedbacks/averageRate/{partnerId}")
     public ResponseEntity<Double> averageRate(@PathVariable("partnerId") int partnerId) {
         return ok(feedbackSrv.averageRate(partnerId));
@@ -69,14 +69,17 @@ public class AdminController {
     public ResponseEntity<List<UserDto>> getCustomers() {
         return ok(customerSrv.findAllCustomers());
     }
+
     @GetMapping("/customers/searchCustomers/{keyword}")
     public ResponseEntity<List<UserDto>> searchCustomers(@PathVariable("keyword") String keyword) {
         return ok(customerSrv.searchCustomers(keyword));
     }
+
     @GetMapping("/customers/customerDashboard/{userId}")
     public ResponseEntity<UserDashboard> customerDashboard(@PathVariable("userId") int userId) {
             return ok(customerSrv.customerDashboard(userId));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/customers/createCustomer")
     public ResponseEntity<?> createCustomer(
@@ -105,10 +108,12 @@ public class AdminController {
     public ResponseEntity<List<StaffDto>> getStaffs() {
         return ok(staffSrv.findAllStaffs());
     }
+
     @GetMapping("/staffs/searchStaffs/{keyword}")
     public ResponseEntity<List<StaffDto>> searchStaffs(@PathVariable("keyword") String keyword) {
         return ok(staffSrv.searchStaffs(keyword));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/staffs/createStaff")
     public ResponseEntity<?> createStaff(
@@ -118,11 +123,13 @@ public class AdminController {
             ObjectMapper mapper = new ObjectMapper();
             UserDto userDto = mapper.readValue(userDtoString, UserDto.class);
             Map<String, String> errors = validateUserDto(userDto);
+            System.out.println(userDto);
             if (!errors.isEmpty()) {
                 return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
             }
+            System.out.println("Validated");
             String existedMessage = userExists(userDto);
-            if(existedMessage != null){
+            if(existedMessage != null && !existedMessage.isEmpty()){
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
                         .body(ApiResponse.conflictData(null, existedMessage));
@@ -147,13 +154,19 @@ public class AdminController {
             if (userDto.getUserid() == 0) {
                 userDto.setUserid(staffId);
             }
+            Optional<User> oldUserOpt = userRepository.findById(staffId);
+            if (oldUserOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Cannot fidn user with ID: " + staffId);
+            }
+            if (userDto.getPassword() == null || userDto.getPassword().trim().isEmpty()) {
+                userDto.setPassword(oldUserOpt.get().getPassword());
+            }
+            System.out.println(oldUserOpt.get().getPassword());
+            System.out.println(userDto.getPassword());
             Map<String, String> errors = validateUserDto(userDto);
-            if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
-                boolean correctPassword = checkCurrentPassword(staffId, userDto);
-                if (!correctPassword) {
-                    errors.put("currentPassword", "Current password is incorrect");
-                    return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
-                }
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
             }
             UserDto updated = userSrv.updateStaff(userDto, avatar);
             return ResponseEntity.ok(updated);
@@ -169,10 +182,12 @@ public class AdminController {
     public ResponseEntity<List<StaffDto>> getManagers() {
         return ok(managerSrv.findAllManagers());
     }
+
     @GetMapping("/managers/searchManagers/{keyword}")
     public ResponseEntity<List<StaffDto>> searchManagers(@PathVariable("keyword") String keyword) {
         return ok(managerSrv.searchManagers(keyword));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/managers/createManager")
     public ResponseEntity<?> createNewManager(
@@ -186,7 +201,7 @@ public class AdminController {
                 return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
             }
             String existedMessage = userExists(userDto);
-            if(existedMessage != null){
+            if(existedMessage != null && !existedMessage.isEmpty()){
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
                         .body(ApiResponse.conflictData(null, existedMessage));
@@ -198,6 +213,7 @@ public class AdminController {
             return ResponseEntity.badRequest().body("Error creating manager: " + e.getMessage());
         }
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/managers/{managerId}")
     public ResponseEntity<?> updateManager(
@@ -208,17 +224,22 @@ public class AdminController {
         try {
             ObjectMapper mapper = new ObjectMapper();
             UserDto userDto = mapper.readValue(userDtoString, UserDto.class);
-
             if (userDto.getUserid() == 0) {
                 userDto.setUserid(managerId);
             }
+            Optional<User> oldUserOpt = userRepository.findById(managerId);
+            if (oldUserOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Cannot fidn user with ID: " + managerId);
+            }
+            if (userDto.getPassword() == null || userDto.getPassword().trim().isEmpty()) {
+                userDto.setPassword(oldUserOpt.get().getPassword());
+            }
+            System.out.println(oldUserOpt.get().getPassword());
+            System.out.println(userDto.getPassword());
             Map<String, String> errors = validateUserDto(userDto);
-            if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
-                boolean correctPassword = checkCurrentPassword(managerId, userDto);
-                if (!correctPassword) {
-                    errors.put("currentPassword", "Current password is incorrect");
-                    return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
-                }
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
             }
             UserDto updated = userSrv.updateStaff(userDto, avatar);
             return ResponseEntity.ok(updated);
@@ -234,21 +255,31 @@ public class AdminController {
     public ResponseEntity<List<PartnerDto>> getPartners() {
         return ResponseEntity.status(200).body(partSrv.findAll());
     }
+
     @GetMapping("/partners/searchPartners/{keyword}")
     public ResponseEntity<List<PartnerDto>> searchPartners(@PathVariable("keyword") String keyword) {
         return ok(partSrv.searchPartners(keyword));
     }
+
     @GetMapping("/partners/findPartnerById/{partnerId}")
     public ResponseEntity<Optional<PartnerDto>> findPartnerById(@PathVariable("partnerId") int partnerId) {
         return ok(partSrv.findPartnerById(partnerId));
     }
+
     @GetMapping("/partners/partnerDashboard/{partnerId}")
     public ResponseEntity<UserDashboard> partnerDashboard(@PathVariable("partnerId") int partnerId) {
         return ok(partSrv.partnerDashboard(partnerId));
     }
+
     @GetMapping("/partners/approvePartner/{partnerId}")
     public ResponseEntity<Boolean> approvePartner(@PathVariable("partnerId") int partnerId) {
         return ok(partSrv.approvePartner(partnerId));
+    }
+
+    //==================SERVICE SECTION==================
+    @GetMapping("/services/searchBySrvType/{keyword}")
+    public ResponseEntity<List<ServiceDto>> searchBySrvType(@PathVariable("keyword") String keyword) {
+        return ok(serviceSrv.findByServiceType(keyword));
     }
 
     //==================EXTRA SERVICE SECTION==================
@@ -262,26 +293,32 @@ public class AdminController {
     public ResponseEntity<List<RequestResQDto>> getReqResQs() {
         return ok(reqResQSrv.findAll());
     }
+
     @GetMapping("/reqResQs/{rrId}")
     public ResponseEntity<Optional<RequestResQDto>> findById(@PathVariable("rrId") int rrId) {
         return ok(reqResQSrv.findById(rrId));
     }
+
     @GetMapping("/reqResQs/searchByUser/{userId}")
     public ResponseEntity<List<RequestResQDto>> searchRRByUser(@PathVariable("userId") int userId) {
         return ok(reqResQSrv.searchByUser(userId));
     }
+
     @GetMapping("/reqResQs/searchByPartner/{partId}")
     public ResponseEntity<List<RequestResQDto>> searchByPartner(@PathVariable("partId") int partId) {
         return ok(reqResQSrv.searchByPartner(partId));
     }
+
     @GetMapping("/reqResQs/searchRequestResQ/{keyword}")
     public ResponseEntity<List<RequestResQDto>> searchRequestResQ(@PathVariable("keyword") String keyword) {
         return ok(reqResQSrv.searchRR(keyword));
     }
+
     @GetMapping("/reqResQs/searchWithUser/{userId}/{keyword}")
     public ResponseEntity<List<RequestResQDto>> searchRequestResQWithUser(@PathVariable("userId") int userId, @PathVariable("keyword") String keyword) {
         return ok(reqResQSrv.searchRRWithUser(userId, keyword));
     }
+
     @GetMapping("/reqResQs/searchWithPartner/{partId}/{keyword}")
     public ResponseEntity<List<RequestResQDto>> searchRequestResQWithPartner(@PathVariable("partId") int partId, @PathVariable("keyword") String keyword) {
         return ok(reqResQSrv.searchRRWithPartner(partId, keyword));
@@ -360,8 +397,8 @@ public class AdminController {
         // Full name
         if (dto.getFullName() == null || dto.getFullName().trim().isEmpty()) {
             errors.put("fullName", "Full name is required");
-        } else if (dto.getFullName().length() < 6) {
-            errors.put("fullName", "Full name must be at least 6 characters");
+        } else if (dto.getFullName().trim().length() < 5){
+            errors.put("fullName", "Full name must be at least 5 characters");
         } else if (!dto.getFullName().matches("^[A-Za-zÀ-ỹà-ỹ\\s]+$")) {
             errors.put("fullName", "Full name must not contain numbers or special characters");
         }
@@ -369,6 +406,13 @@ public class AdminController {
         // Username
         if (dto.getUserName() == null || dto.getUserName().trim().isEmpty()) {
             errors.put("userName", "Username is required");
+        }else if(!dto.getUserName().matches("^[a-zA-Z0-9]+$")) {
+            errors.put("userName", "Username must not contain whitespace or special characters");
+        }
+
+        //Address
+        if(dto.getAddress() == null || dto.getAddress().trim().isEmpty()) {
+            errors.put("address", "Address is required");
         }
 
         // Email
@@ -388,8 +432,8 @@ public class AdminController {
         // Password
         if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
             errors.put("password", "Password is required");
-        } else if (dto.getPassword().length() < 6) {
-            errors.put("password", "Password must be at least 6 characters");
+        } else if (!dto.getPassword().matches("^.{8,}$")) {
+            errors.put("password", "Password must have at least 8 characters");
         }
 
         return errors;
@@ -398,28 +442,20 @@ public class AdminController {
     public String userExists(UserDto dto) {
         List<User> users = userRepository.findAll();
         for (User user : users) {
-            if(user.getSdt().contains(dto.getSdt())){
+            if(user.getSdt().equals(dto.getSdt())){
                 return "User with this phone number already exists";
             }
-            if(user.getUsername().contains(dto.getUserName())){
+            if(user.getUsername().equals(dto.getUserName())){
                 return "User with this username already exists";
             }
-            if(user.getEmail().contains(dto.getEmail())){
+            if(user.getEmail().equals(dto.getEmail())){
                 return "User with this email already exists";
             }
-            if(user.getAddress().contains(dto.getAddress())){
+            if(user.getAddress().equals(dto.getAddress())){
                 return "User with this address already exists";
             }
         }
-        return "";
-    }
-
-    public boolean checkCurrentPassword(int id, UserDto dto) {
-        User currentUser = userRepository.findById(id).get();
-        if(encoder.matches(dto.getCurrentPassword(),currentUser.getPassword())) {
-            return true;
-        }
-        return false;
+        return null;
     }
 
 }

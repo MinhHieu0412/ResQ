@@ -9,8 +9,7 @@ const FormStaff = ({ onBack, staff, isEdit }) => {
         email: isEdit && staff ? staff.email : '',
         sdt: isEdit && staff ? staff.sdt : '',
         address: isEdit && staff ? staff.address : '',
-        currentPassword: '',
-        password: '',
+        password: isEdit && staff ? '' : '2025@ResQ',
         avatar: isEdit && staff ? staff.avatar : '',
     });
 
@@ -190,21 +189,8 @@ const FormStaff = ({ onBack, staff, isEdit }) => {
                             />
                             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                         </div>
-                        {isEdit &&
-                            <div>
-                                <label className={labelClass}>Current Password</label>
-                                <input
-                                    type="password"
-                                    name="currentPassword"
-                                    value={formData.currentPassword}
-                                    onChange={handleChange}
-                                    className={inputClass}
-                                />
-                                {errors.currentPassword && <p className="text-red-500 text-sm mt-1">{errors.currentPassword}</p>}
-                            </div>
-                        }
                         <div>
-                            <label className={labelClass}>New Password</label>
+                            <label className={labelClass}>Password</label>
                             <input
                                 type="password"
                                 name="password"

@@ -2,10 +2,7 @@ package com.livewithoutthinking.resq.service.serviceImpl;
 
 import com.livewithoutthinking.resq.dto.UserDto;
 import com.livewithoutthinking.resq.dto.UserDashboard;
-import com.livewithoutthinking.resq.entity.Bill;
-import com.livewithoutthinking.resq.entity.RequestRescue;
-import com.livewithoutthinking.resq.entity.Role;
-import com.livewithoutthinking.resq.entity.User;
+import com.livewithoutthinking.resq.entity.*;
 import com.livewithoutthinking.resq.mapper.UserMapper;
 import com.livewithoutthinking.resq.repository.*;
 import com.livewithoutthinking.resq.service.CustomerService;
@@ -29,6 +26,8 @@ public class CustomerServiceImpl implements CustomerService {
     private RequestResQRepository requestResQRepo;
     @Autowired
     private RoleRepository roleRepo;
+    @Autowired
+    private NotificationRepository notificationRepo;
     @Autowired
     private PasswordEncoder encoder;
 
@@ -94,6 +93,16 @@ public class CustomerServiceImpl implements CustomerService {
         newCus.setStatus("Waiting");
         newCus.setRole(role);
         newCus.setCreatedAt(new Date());
-        return customerRepo.save(newCus);
+
+        User savedCus = customerRepo.save(newCus);
+
+        Notification noti = new Notification();
+        noti.setUser(newCus);
+        noti.setCreatedAt(new Date());
+        noti.setMessage("Welcome to ResQ! Your default password is $resQ2025" +
+                "We recommend changing it immediately to keep your account secure!");
+        notificationRepo.save(noti);
+
+        return savedCus;
     }
 }

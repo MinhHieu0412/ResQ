@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { managerAPI } from "../../../../admin";
 
 const FormManager = ({ onBack, manager, isEdit }) => {
@@ -9,8 +9,7 @@ const FormManager = ({ onBack, manager, isEdit }) => {
         email: isEdit && manager ? manager.email : '',
         sdt: isEdit && manager ? manager.sdt : '',
         address: isEdit && manager ? manager.address : '',
-        currentPassword: '',
-        password: '',
+        password: isEdit && manager ? '' : '2025@ResQ',
         avatar: isEdit && manager ? manager.avatar : '',
     });
 
@@ -113,7 +112,12 @@ const FormManager = ({ onBack, manager, isEdit }) => {
             };
         }
     }
-    
+
+    // const [showOTP, setShowOTP] = useState(false);
+    // const [enteredOTP, setEnteredOTP] = useState("");
+    // const DEFAULT_OTP = "171216";
+
+
     const inputClass =
         "w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#68A2F0] transition";
     const labelClass = "font-medium text-gray-700";
@@ -187,21 +191,8 @@ const FormManager = ({ onBack, manager, isEdit }) => {
                             />
                             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                         </div>
-                        {isEdit &&
-                            <div>
-                                <label className={labelClass}>Current Password</label>
-                                <input
-                                    type="password"
-                                    name="currentPassword"
-                                    value={formData.currentPassword}
-                                    onChange={handleChange}
-                                    className={inputClass}
-                                />
-                                {errors.currentPassword && <p className="text-red-500 text-sm mt-1">{errors.currentPassword}</p>}
-                            </div>
-                        }
                         <div>
-                            <label className={labelClass}>New Password</label>
+                            <label className={labelClass}>Password</label>
                             <input
                                 type="password"
                                 name="password"
@@ -241,7 +232,27 @@ const FormManager = ({ onBack, manager, isEdit }) => {
                     </form>
                 </div>
             </div>
+            {/*OTP*/}
+            {/* <div className="fixed inset-0 z-70 flex items-center pl-[42vw] bg-black bg-opacity-40">
+                <div class="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
+                    <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Input OTP</h2>
 
+                    <p class="text-center text-gray-500 mb-4">Please enter the 6-digit code sent to your phone</p>
+
+                    <div class="flex justify-center space-x-2 mb-6" id="otp-container">
+                        <input type="text" maxlength="1" value="1" class="otp-input w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="text" maxlength="1" value="6" class="otp-input w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="text" maxlength="1" value="4" class="otp-input w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="text" maxlength="1" value="6" class="otp-input w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="text" maxlength="1" value="2" class="otp-input w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="text" maxlength="1" value="3" class="otp-input w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <div className="float-right italic text-red-600 py-2 text-xs">
+                        *Default OTP for create through call is 164623
+                    </div>
+                    <button class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">Verify</button>
+                </div>
+            </div> */}
             {/* Popup */}
             {isRun && (
                 <div className="fixed inset-0 z-70 flex items-center pl-[42vw] bg-black bg-opacity-40">
