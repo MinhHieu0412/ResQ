@@ -41,7 +41,7 @@ public class PersonalData {
     private String type;  // Type là VARCHAR(50)
 
     @Column(name = "FaceImage")
-    private String faceImage;  // FaceImage là VARCHAR(255)
+    private String faceImage;// FaceImage là VARCHAR(255)
 
     // Constructor, Getters, Setters and other methods if needed
 }

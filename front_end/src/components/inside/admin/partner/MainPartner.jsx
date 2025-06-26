@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { feedbackAPI, partnerAPI } from "../../../../admin";
 import SidebarPartner from "./SidebarPartner";
 import Performance from "./Performance";
@@ -19,6 +18,21 @@ const MainPartner = () => {
   const [partners, setPartners] = useState([]);
   const [keyword, setKeyword] = useState('');
   const [waitingPartners, setWaitingPartners] = useState([]);
+
+  const fetchPartnersWithRate = async () => {
+    const response = await partnerAPI.getAllPartners();
+    const result = await Promise.all(response.data.map(async (item) => {
+      try {
+        const rateRes = await feedbackAPI.averageRate(item.partnerId);
+        item.avgRate = rateRes.data;
+      } catch {
+        item.avgRate = null;
+      }
+      return item;
+    }));
+    return result;
+  };
+
   // Get Partners 
   const fetchPartners = async () => {
     try {
@@ -36,9 +50,11 @@ const MainPartner = () => {
         }
       }
       setPartners(result);
+      return result;
     } catch (error) {
       console.error('Error fetching partners', error);
       setIsLoading(false);
+      return [];
     }
   };
 
@@ -47,10 +63,21 @@ const MainPartner = () => {
     e.preventDefault();
     try {
       if (keyword.trim() === '') {
-        fetchPartners();
+        if (approving) {
+          const waitingList = partners.filter(p => p.verificationStatus === false);
+          setWaitingPartners(waitingList);
+        } else {
+          await fetchPartners();
+        }
       } else {
         const response = await partnerAPI.search(keyword);
-        setPartners(response.data);
+        const searchResults = response.data;
+        if (approving) {
+          const waitingList = searchResults.filter(p => p.verificationStatus === false);
+          setWaitingPartners(waitingList);
+        } else {
+          setPartners(searchResults);
+        }
         setIsLoading(false);
       }
     } catch (err) {
@@ -97,15 +124,22 @@ const MainPartner = () => {
 
   {/* OTHER FUNC */ }
   // Check Approving
-  const handleApproval = () => {
+  const handleApproval = async () => {
     setApproving(true);
-    const waitingList = partners.filter((p) => p.verificationStatus === false);
+    setKeyword('');
+    setStatusFilter('');
+    setServiceFilter('');
+    const result = await fetchPartners();
+    const waitingList = result.filter((p) => p.verificationStatus === false);
     setWaitingPartners(waitingList);
   };
 
   const handleBack = () => {
     setApproving(false);
     setSelectedPartner(null);
+    setKeyword('');
+    setStatusFilter('');
+    setServiceFilter('');
     fetchPartners();
   }
 
@@ -142,35 +176,42 @@ const MainPartner = () => {
   };
 
   const renderTableHeaders = () => (
-    <thead className="font-raleway border bg-[#68A2F0] text-white h-12 border-r-0 border-l-0">
+    <thead className="font-raleway border bg-[#68A2F0] text-white h-12 border-r-0 border-l-0 text-sm">
       <tr>
-        <th>ID</th>
-        <th>Username</th>
-        <th>Phone No.</th>
-        <th>Email</th>
-        <th>Address</th>
-        <th>
+        <th className="w-[4%] px-2 whitespace-nowrap">ID</th>
+        <th className="w-[14%] px-4">Username</th>
+        <th className="w-[11%] px-2 whitespace-nowrap">Phone No.</th>
+        <th className="w-[16%] px-4">Email</th>
+        <th className="w-[18%] px-4">Address</th>
+        <th className="w-[6%] px-2 whitespace-nowrap">
           Rate
           <button onClick={() => toggleSort("rate")}>
-            <img
-              src={`../../../../../public/images/icon-web/Chevron ${sortOrder === "asc" ? "Up" : "Down"}.png`}
-              className="h-3 ml-2"
-            />
+            {sortField === "rate" ? (
+              <img
+                src={`/images/icon-web/Chevron ${sortOrder === "asc" ? "Up" : "Down"}.png`}
+                className="h-3 ml-2 inline-block"
+              />
+            ) : (
+              <img
+                src={`/images/icon-web/sort.png`}
+                className="h-3 ml-2 inline-block"
+              />
+            )}
           </button>
         </th>
-        <th>Service</th>
-        <th>Status</th>
-        <th>Verified</th>
-        <th>
+        <th className="w-[13%] px-4">Service</th>
+        <th className="w-[8%] px-2 whitespace-nowrap">Status</th>
+        <th className="w-[6%] px-2 whitespace-nowrap">Verified</th>
+        <th className="w-[14%] px-2 whitespace-nowrap">
           Joined Date
           <button onClick={() => toggleSort("joined")}>
             <img
-              src={`../../../../../public/images/icon-web/Chevron ${sortOrder === "asc" ? "Up" : "Down"}.png`}
-              className="h-3 ml-2"
+              src={`/images/icon-web/Chevron ${sortOrder === "asc" ? "Up" : "Down"}.png`}
+              className="h-3 ml-2 inline-block"
             />
           </button>
         </th>
-        <th>Action</th>
+        <th className="w-[6%] px-2">Action</th>
       </tr>
     </thead>
   );
@@ -188,7 +229,7 @@ const MainPartner = () => {
             {part.avgRate ? part.avgRate.toFixed(2) : "0.0"}
           </td>
           <td className="pl-2">
-            {[part.resTow && "Tow", part.resFix && "Fix", part.resDrive && "Drive"]
+            {[part.resTow && "resTow", part.resFix && "resFix", part.resDrive && "resDrive"]
               .filter(Boolean)
               .join(" || ")
             }
@@ -225,7 +266,7 @@ const MainPartner = () => {
   useEffect(() => {
     fetchPartners();
     setCurrentPage(1);
-  }, [statusFilter, serviceFilter, keyword]);
+  }, [statusFilter]);
 
   return (
     <div>
@@ -258,18 +299,18 @@ const MainPartner = () => {
                   </button>
                 </form>
                 {/* Filter Service */}
-                <div className="items-center border border-gray-300 rounded-full mt-[2vh] h-[4.5vh] w-36 ml-4">
+                <div className="items-center border border-gray-300 rounded-full mt-[2.1vh] h-[5vh] ml-48 w-36">
                   <select className="mx-4 mt-2"
                     value={serviceFilter} onChange={(e) => setServiceFilter(e.target.value)}>
                     <option value="">--- Service ---</option>
-                    <option value="resTow">Towing</option>
-                    <option value="resFix">Fixing</option>
-                    <option value="resDrive">Driving</option>
+                    <option value="resTow">resTow</option>
+                    <option value="resFix">resFix</option>
+                    <option value="resDrive">resDrive</option>
                   </select>
                 </div>
               </div>
               {/* Partner Not Approved List */}
-              <table className="w-[96%] mx-8 table-auto border rounded-2xl border-r-0 border-l-0">
+              <table className="w-[96%] mx-8 border rounded-2xl border-r-0 border-l-0">
                 {renderTableHeaders()}
                 {renderTableBody()}
               </table>
@@ -314,9 +355,9 @@ const MainPartner = () => {
                 <div className="items-center border border-gray-300 rounded-full mt-[2vh] h-[4.5vh] w-36 ml-8">
                   <select className="mx-3 mt-2" value={serviceFilter} onChange={(e) => setServiceFilter(e.target.value)}>
                     <option value="">--- Service ---</option>
-                    <option value="resTow">Towing</option>
-                    <option value="resFix">Fixing</option>
-                    <option value="resDrive">Driving</option>
+                    <option value="resTow">resTow</option>
+                    <option value="resFix">resFix</option>
+                    <option value="resDrive">resDrive</option>
                   </select>
                 </div>
               </div>

@@ -1,24 +1,35 @@
 import React, { useState, useEffect } from "react";
 import NewCustomer from "./NewCustomer";
-import { customerAPI } from "../../../../admin";
+import { customerAPI, paymentAPI, reqResQsAPI, serviceAPI, requestSrvAPI } from "../../../../admin";
 import Select from "react-select";
 
 const FormRequest = ({ onBack, isEdit, req }) => {
   const [newCustomer, setNewCustomer] = useState(false);
-  const [customers, setCustomers] = useState([]);
-  const [fileName, setFileName] = useState("No file chosen");
+  const getVNLocalDateTime = () => {
+    const now = new Date();
+    now.setHours(now.getHours() + 7);
+    return now.toISOString().slice(0, 16);
+  };
 
   const [formData, setFormData] = useState({
-    customer: '',
-    service: '',
-    address: '',
-    description: '',
-    image: '',
-    requestTime: '',
-    price: '',
-    paymentMethod: '',
-    note: '',
+    customerId: isEdit && req ? req.customerId : 0,
+    ulocation: isEdit && req ? req.ulocation : '',
+    destination: isEdit && req ? req.destination : '',
+    description: isEdit && req ? req.description : '',
+    rescueType: isEdit && req ? req.rescueType : '',
+    createdAt: isEdit && req && req.createdAt
+      ? new Date(req.createdAt).toISOString().slice(0, 16)
+      : getVNLocalDateTime(),
+    per_km: '',
+    km: '1',
+    total: isEdit && req ? req.total : 0,
+    paymentMethod: isEdit && req ? req.paymentMethod || '' : '',
   });
+
+  const [customers, setCustomers] = useState([]);
+  const [selectedSrv, setSelectedSrv] = useState([]);
+  const [services, setServices] = useState([]);
+  const [payments, setPayments] = useState([]);
 
   const fetchCustomers = async () => {
     try {
@@ -29,73 +40,204 @@ const FormRequest = ({ onBack, isEdit, req }) => {
     }
   };
 
-  // Xử lý khi edit
-  useEffect(() => {
-    if (isEdit && req) {
-      setFormData({
-        customer: req.user?.userid || '',
-        service: req.user?.rescueType || '',
-        address: req.ulocation || '',
-        description: req.description || '',
-        image: req.image || '',
-        requestTime: req.updatedAt ? new Date(req.updatedAt).toISOString().slice(0, 16) : '',
-        price: req.bill?.totalPrice || '',
-        paymentMethod: req.bill?.method || '',
-        note: req.note || '',
-      });
+  const fetchPayments = async () => {
+    try {
+      if (!formData.customerId) return;
+      const res = await paymentAPI.customerPayments(formData.customerId);
+      setPayments(res.data);
+    } catch (err) {
+      console.error("Cannot get user")
+    }
+  }
 
-      if (req.image) {
-        setFileName(typeof req.image === "string" ? req.image : "Selected");
+  const handleCustomerCreated = async (newCustomer) => {
+    setNewCustomer(false);
+    setFormData((prev) => ({
+      ...prev,
+      customerId: newCustomer.userid,
+      ulocation: newCustomer.address,
+      createdAt: getVNLocalDateTime(),
+    }));
+    setCustomers((prev) => [...prev, newCustomer]);
+    const res = await paymentAPI.customerPayments(newCustomer.userId);
+    setPayments(res.data);
+  };
+
+  const handleSelectMainSrv = async (e) => {
+    const selectedValue = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      rescueType: selectedValue,
+      selectedService: '',
+      per_km: '',
+      total: ''
+    }));
+    setSelectedSrv([]);
+    if (selectedValue) {
+      try {
+        const response = await serviceAPI.findBySrvType(selectedValue);
+        setServices(response.data);
+      } catch (err) {
+        console.log("Cannot get services: " + err);
       }
     }
-  }, [isEdit, req]);
+  };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFileName(file.name);
-      setFormData(prev => ({ ...prev, image: file }));
-    } else {
-      setFileName("No file chosen");
-    }
+  const calculatePrice = (per_km, km) => {
+    const p = parseFloat(per_km);
+    const k = parseFloat(km);
+    return !isNaN(p) && !isNaN(k) ? (p * k) : '';
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: value };
+
+      if (name === 'km' || name === 'per_km') {
+        updated.total = calculatePrice(
+          name === 'per_km' ? value : updated.per_km,
+          name === 'km' ? value : updated.km
+        );
+      }
+
+      return updated;
+    });
   };
 
-  const handleSubmit = (e) => {
+  const [errors, setErrors] = useState({});
+  const [isRun, setIsRun] = useState(false);
+  const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const submissionData = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      submissionData.append(key, value);
-    });
 
-    console.log("Submitting form data...");
-    for (let pair of submissionData.entries()) {
-      console.log(`${pair[0]}:`, pair[1]);
-    }
+    submissionData.append("requestDtoString", JSON.stringify({
+      customerId: formData.customerId,
+      ulocation: formData.ulocation,
+      destination: formData.destination,
+      description: formData.description,
+      rescueType: formData.rescueType,
+      createdAt: getVNLocalDateTime(),
+      total: formData.total,
+      paymentMethod: formData.paymentMethod,
+      note: formData.note || '',
+    }));
+    submissionData.append("selectedServices", JSON.stringify(formData.selectedServices));
 
-    // TODO: Gửi API
-  };
+    try {
+      let response;
+      if (isEdit) {
+        response = await reqResQsAPI.updateRequest(req.rrid, submissionData);
+      } else {
+        response = await reqResQsAPI.createNew(submissionData);
+      }
+      if (response?.data) {
+        setIsRun(true);
+        setIsSuccess(true);
+        if (isEdit) {
+          setMessage("Update Request Success!");
+        } else {
+          setMessage("Create New Request Success!");
+        }
+        setTimeout(() => {
+          onBack();
+        }, 3000);
+      } else {
+        setIsRun(true);
+        setIsSuccess(false);
+        if (isEdit) {
+          setMessage("Update Request Fail!");
+        } else {
+          setMessage("Create New Request Fail!");
+        }
+
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        const { message, errors } = error.response.data;
+        setMessage(message);
+        setErrors(errors);
+      } else {
+        setIsRun(true);
+        setIsSuccess(false);
+        if (isEdit) {
+          setMessage("Update Request Fail!");
+        } else {
+          setMessage("Create New Request Fail!");
+          setIsSuccess(false); setTimeout(() => {
+            setIsRun(false);
+            setIsSuccess(false);
+          }, 3000);
+          console.log(error);
+        }
+      };
+    };
+  }
 
   const handleBackCreate = () => {
     setNewCustomer(false);
     fetchCustomers();
   };
 
-  // Fetch danh sách khách hàng
   useEffect(() => {
     fetchCustomers();
-  }, []);
+    if (formData.customerId) {
+      fetchPayments();
+    }
+
+    if (isEdit) {
+      const init = async () => {
+        try {
+          const selectedResponse = await requestSrvAPI.getRequestServices(req.rrid);
+          const selectedIds = selectedResponse.data.map(s => s.service.serviceId.toString());
+          setSelectedSrv(selectedIds);
+          setFormData(prev => ({ ...prev, selectedServices: selectedIds }));
+
+          const srvRes = await serviceAPI.findBySrvType(formData.rescueType);
+          setServices(srvRes.data);
+
+          // ✅ Tìm dịch vụ đã chọn đầu tiên (với ResTow/ResDrive chỉ có 1)
+          const selectedService = srvRes.data.find(s => selectedIds.includes(s.srvId.toString()));
+
+          if (formData.rescueType === "ResFix") {
+            const total = srvRes.data
+              .filter(s => selectedIds.includes(s.srvId.toString()))
+              .reduce((sum, s) => sum + (s.srvPrice || 0), 0);
+
+            setFormData(prev => ({
+              ...prev,
+              per_km: total,
+              total: calculatePrice(total, prev.km),
+            }));
+          } else if (selectedService) {
+            setFormData(prev => ({
+              ...prev,
+              per_km: selectedService.srvPrice || '',
+              total: calculatePrice(selectedService.srvPrice, prev.km),
+            }));
+          }
+        } catch (err) {
+          console.log("Lỗi khi khởi tạo dữ liệu edit:", err);
+        }
+      };
+
+
+      init();
+    }
+  }, [formData.customerId]);
+
+
+
   const inputClass = "w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#68A2F0] transition";
   const labelClass = "font-medium text-gray-700";
 
   return (
     <div>
       {newCustomer ? (
-        <NewCustomer onBack={handleBackCreate} />
+        <NewCustomer onBack={handleBackCreate} onCustomerCreated={handleCustomerCreated} />
       ) : (
         <div className="min-h-screen px-4 py-10">
           <div className="ml-5">
@@ -109,7 +251,7 @@ const FormRequest = ({ onBack, isEdit, req }) => {
                 {isEdit ? "Edit Rescue Request" : "Create New Request"}
               </h1>
               <form className="space-y-4" onSubmit={handleSubmit}>
-                {/* Customer dropdown */}
+                {/* Customer */}
                 <div>
                   <label className={labelClass}>Customer</label>
                   <Select
@@ -119,82 +261,198 @@ const FormRequest = ({ onBack, isEdit, req }) => {
                     }))}
                     value={customers
                       .map(cus => ({ value: cus.userid, label: cus.fullName }))
-                      .find(option => option.value === formData.customer)}
-                    onChange={(selected) =>
-                      setFormData(prev => ({ ...prev, customer: selected ? selected.value : '' }))
-                    }
-                    placeholder="Select or search customer..."
+                      .find(option => option.value === formData.customerId)}
+                    onChange={(selected) => {
+                      const selectedCustomer = customers.find(cus => cus.userid === selected?.value);
+                      setFormData(prev => ({
+                        ...prev,
+                        customerId: selected?.value || '',
+                        ulocation: selectedCustomer?.address || ''
+                      }));
+                    }}
+                    placeholder="Select or search customerId..."
                     isClearable
+                    isDisabled={isEdit}
                   />
-                  <button
-                    type="button"
-                    className="bg-[#68A2F0] text-white text-sm mt-2 px-4 py-2 rounded-full cursor-pointer hover:bg-[#4e8ad6] transition"
-                    onClick={() => setNewCustomer(true)}
-                  >
-                    New Customer
-                  </button>
+                  {errors.customerId && <p className="text-red-500 text-sm mt-1">{errors.customerId}</p>}
+                  {!isEdit &&
+                    <button
+                      type="button"
+                      className="bg-[#68A2F0] text-white text-sm mt-2 px-4 py-2 rounded-full hover:bg-[#4e8ad6]"
+                      onClick={() => setNewCustomer(true)}
+                    >
+                      New Customer
+                    </button>
+                  }
                 </div>
+
+                {/* Address */}
                 <div>
                   <label className={labelClass}>Customer's Address</label>
                   <input
                     type="text"
-                    name="address"
-                    value={formData.address}
+                    name="ulocation"
+                    value={formData.ulocation}
                     onChange={handleChange}
                     className={inputClass}
-                    placeholder="Enter address"
+                    placeholder="Enter ulocation"
                   />
+                  {errors.ulocation && <p className="text-red-500 text-sm mt-1">{errors.ulocation}</p>}
                 </div>
+
+                {/* Service type */}
                 <div>
                   <label className={labelClass}>Service</label>
                   <select
                     name="service"
-                    value={formData.service}
-                    onChange={handleChange}
+                    value={formData.rescueType}
+                    onChange={handleSelectMainSrv}
                     className={inputClass}
+                    disabled={isEdit}
                   >
                     <option value="">-- Select service --</option>
-                    <option>Replace Driver</option>
-                    <option>On Site</option>
-                    <option>Towing</option>
+                    <option value="ResDrive">Replace Driver</option>
+                    <option value="ResFix">On Site</option>
+                    <option value="ResTow">Towing</option>
                   </select>
+                  {errors.rescueType && <p className="text-red-500 text-sm mt-1">{errors.rescueType}</p>}
                 </div>
+
+                {/* Specific Service */}
                 <div>
-                  <label className={labelClass}>Specific service</label>
-                  <select
-                    name="specificService"
-                    value={formData.service}
-                    onChange={handleChange}
-                    className={inputClass}
-                  >
-                    <option value="">-- Select service --</option>
-                    <option>Replace Driver</option>
-                    <option>On Site</option>
-                    <option>Towing</option>
-                  </select>
+                  <label className={labelClass}>Specific Service</label>
+                  {formData.rescueType === "ResFix" ? (
+                    <div className="border border-gray-300 rounded-xl p-4 h-60 overflow-y-auto space-y-2">
+                      {services.map((srv) => (
+                        <label
+                          key={srv.srvId}
+                          className="flex items-start space-x-3 bg-gray-50 hover:bg-blue-50 transition p-2 rounded-lg"
+                        >
+                          <input
+                            type="checkbox"
+                            value={srv.srvId}
+                            checked={selectedSrv.includes(srv.srvId.toString())}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              let updated = [];
+
+                              if (e.target.checked) {
+                                updated = [...selectedSrv, value];
+                              } else {
+                                updated = selectedSrv.filter(id => id !== value);
+                              }
+
+                              setSelectedSrv(updated);
+
+                              const total = services
+                                .filter(s => updated.includes(s.srvId.toString()))
+                                .reduce((sum, s) => sum + (s.srvPrice || 0), 0);
+
+                              const newPrice = calculatePrice(total, formData.km);
+
+                              setFormData(prev => ({
+                                ...prev,
+                                selectedServices: updated,
+                                per_km: total,
+                                total: newPrice
+                              }));
+                            }}
+                            className="mt-1"
+                            disabled={isEdit}
+                          />
+                          <div>
+                            <div className="font-medium text-sm text-gray-700">{srv.srvName}</div>
+                            <div className="text-xs text-gray-500">Price: ${srv.srvPrice}</div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <select
+                      className={inputClass}
+                      value={selectedSrv}
+                      onChange={(e) => {
+                        const selectedId = e.target.value;
+                        setSelectedSrv(selectedId);
+
+                        const selectedService = services.find(srv => srv.srvId.toString() === selectedId);
+                        if (selectedService) {
+                          const newPrice = calculatePrice(selectedService.srvPrice, formData.km);
+                          setFormData(prev => ({
+                            ...prev,
+                            selectedServices: [selectedId],
+                            per_km: selectedService.srvPrice,
+                            total: newPrice
+                          }));
+                        }
+                      }}
+                      disabled={isEdit}
+                    >
+                      <option value="">--- Specific Service ---</option>
+                      {services.map((srv) => (
+                        <option key={srv.srvId} value={srv.srvId}>
+                          {srv.srvName}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {errors.specificSrv && <p className="text-red-500 text-sm mt-1">{errors.specificSrv}</p>}
                 </div>
+
+                {/* Only show when NOT ResFix */}
+                {formData.rescueType !== "ResFix" && formData.rescueType !== "" &&
+                  <>
+                    <div>
+                      <label className={labelClass}>Destination</label>
+                      <input
+                        type="text"
+                        name="destination"
+                        value={formData.destination}
+                        onChange={handleChange}
+                        className={inputClass}
+                        placeholder="Enter address"
+                      />
+                      {errors.destination && <p className="text-red-500 text-sm mt-1">{errors.destination}</p>}
+                    </div>
+                    <div>
+                      <label className={labelClass}>Per Km</label>
+                      <input
+                        type="text"
+                        name="per_km"
+                        value={formData.per_km}
+                        onChange={handleChange}
+                        className={inputClass}
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>Km</label>
+                      <input
+                        type="number"
+                        name="km"
+                        value={formData.km}
+                        onChange={handleChange}
+                        className={inputClass}
+                        disabled
+                      />
+                    </div>
+                  </>
+                }
+
+                {/* Price */}
                 <div>
-                  <label className={labelClass}>Destination</label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    className={inputClass}
-                    placeholder="Enter address"
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>Price</label>
+                  <label className={labelClass}>Total Price</label>
                   <input
                     type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    className={inputClass}
-                    placeholder="Enter price"
+                    name="total"
+                    value={formData.total}
+                    readOnly
+                    className={`${inputClass} bg-gray-100`}
+                    placeholder="Auto-calculated"
                   />
                 </div>
+
+                {/* Others */}
                 <div>
                   <label className={labelClass}>Payment Method</label>
                   <select
@@ -203,20 +461,26 @@ const FormRequest = ({ onBack, isEdit, req }) => {
                     onChange={handleChange}
                     className={inputClass}
                   >
-                    <option>Cash</option>
+                    <option value="">-- Select payment method --</option>
+                    {payments.map((method, index) => (
+                      <option key={index} value={method.id}>
+                        {method.name}
+                      </option>
+                    ))}
                   </select>
+                  {errors.paymentMethod && <p className="text-red-500 text-sm mt-1">{errors.paymentMethod}</p>}
                 </div>
                 <div>
                   <label className={labelClass}>Request Time</label>
                   <input
                     type="datetime-local"
-                    name="requestTime"
-                    value={formData.requestTime}
+                    name="createdAt"
+                    value={formData.createdAt}
                     onChange={handleChange}
                     className={inputClass}
+                    disabled
                   />
                 </div>
-
                 <div>
                   <label className={labelClass}>Description</label>
                   <textarea
@@ -228,25 +492,6 @@ const FormRequest = ({ onBack, isEdit, req }) => {
                     placeholder="Describe the issue or request details..."
                   />
                 </div>
-                <div>
-                  <label className={labelClass}>Upload Image</label>
-                  <div className="flex items-center gap-3">
-                    <label
-                      htmlFor="imageUpload"
-                      className="bg-[#68A2F0] text-white text-sm px-4 py-2 rounded-full cursor-pointer hover:bg-[#4e8ad6] transition"
-                    >
-                      Choose File
-                    </label>
-                    <input
-                      type="file"
-                      id="imageUpload"
-                      name="image"
-                      className="hidden"
-                      onChange={handleFileChange}
-                    />
-                    <span className="text-sm text-gray-600">{fileName}</span>
-                  </div>
-                </div>
                 <div className="text-center pt-4">
                   <button
                     type="submit"
@@ -257,7 +502,25 @@ const FormRequest = ({ onBack, isEdit, req }) => {
                 </div>
               </form>
             </div>
-          </div>
+          </div>{/* Popup */}
+          {isRun && (
+            <div className="fixed inset-0 z-70 flex items-center pl-[42vw] bg-black bg-opacity-40">
+              <div className="bg-white px-20 py-10 rounded-2xl shadow-xl text-center">
+                {isSuccess ?
+                  <div className="pl-28 pb-5">
+                    <img src="/images/icon-web/success.png" alt="success" className="w-[8vw]" />
+                  </div>
+                  :
+                  <div className="pl-28 pb-5">
+                    <img src="/images/icon-web/fail.png" alt="fail" className="w-[8vw]" />
+                  </div>
+                }
+                <h2 className="text-2xl text-gray-600 w-[20vw]">
+                  {message}
+                </h2>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

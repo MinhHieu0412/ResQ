@@ -174,9 +174,9 @@ const History = ({ customer }) => {
             onChange={(e) => setServiceFilter(e.target.value)}
           >
             <option value="">--- Service ---</option>
-            <option value="ResTow">Towing</option>
-            <option value="ResFix">Fixing</option>
-            <option value="ResDrive">Driving</option>
+            <option value="ResTow">ResTow</option>
+            <option value="ResFix">ResFix</option>
+            <option value="ResDrive">ResDrive</option>
           </select>
         </div>
       </div>

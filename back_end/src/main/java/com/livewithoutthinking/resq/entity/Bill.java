@@ -20,12 +20,12 @@ public class Bill {
 
     @Column(name = "ServicePrice")
     private double servicePrice; // Giá dịch vụ
-    
+
     @Column(name = "DistancePrice")
     private double distancePrice; // Giá dịch vụ theo khoảng cách
 
-    @Column(name = "ExtraPrice")
-    private double extraPrice; // Giá dịch vụ phụ (nếu có)
+//    @Column(name = "ExtraPrice")
+//    private double extraPrice; // Giá dịch vụ phụ (nếu có)
 
     @Column(name = "TotalPrice")
     private double totalPrice; // Tổng số tiền cần thanh toán
@@ -34,11 +34,11 @@ public class Bill {
     @JoinColumn(name = "PaymentID", referencedColumnName = "PaymentID", nullable = true)
     private Payment payment; // Liên kết với bảng Payment
 
-    @Column(name = "ULocation")
-    private String uLocation; // Vị trí của người dùng
-
-    @Column(name = "PLocation")
-    private String pLocation; // Vị trí của đối tác
+//    @Column(name = "ULocation")
+//    private String uLocation; // Vị trí của người dùng
+//
+//    @Column(name = "PLocation")
+//    private String pLocation; // Vị trí của đối tác
 
     @Column(name = "AppFee")
     private double appFee; // Giá dịch vụ theo loại
@@ -60,11 +60,11 @@ public class Bill {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt; // Thời gian cập nhật
 
-    @Column(name = "PaymentMethod")
-    private String paymentMethod; // "MOMO", "PAYPAL"
+//    @Column(name = "PaymentMethod")
+//    private String paymentMethod; // "MOMO", "PAYPAL"
 
-    @Column(name = "TransactionId")
-    private String transactionId; // Mã giao dịch từ MoMo hoặc PayPal
+//    @Column(name = "TransactionId")
+//    private String transactionId; // Mã giao dịch từ MoMo hoặc PayPal
 
     @Column(name = "Currency")
     private String currency; // "VND" hoặc "USD"

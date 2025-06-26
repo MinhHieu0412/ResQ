@@ -8,7 +8,8 @@ import com.livewithoutthinking.resq.entity.Partner;
 import java.util.List;
 
 public interface PartnerRepository extends JpaRepository<Partner, Long> {
-    @Query("SELECT p FROM Partner p WHERE p.user.fullName LIKE :keyword")
+    @Query("SELECT p FROM Partner p WHERE p.user.fullName LIKE :keyword or p.user.sdt LIKE :keyword " +
+            "or p.user.email LIKE :keyword")
     List<Partner> searchPartners(String keyword);
     @Query("SELECT p FROM Partner p WHERE p.partnerId = :partnerId")
     Partner findPartnerById(int partnerId);

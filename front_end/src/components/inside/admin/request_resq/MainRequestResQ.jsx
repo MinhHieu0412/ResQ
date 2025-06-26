@@ -177,9 +177,9 @@ const RescueReQs = ({ partner }) => {
             <div className="items-center border border-gray-300 rounded-full mt-[2vh] h-[5vh] w-36 ml-[1vw]">
               <select className="mx-3 mt-2" value={serviceFilter} onChange={(e) => setServiceFilter(e.target.value)}>
                 <option value="">--- Service ---</option>
-                <option value="ResTow">Towing</option>
-                <option value="ResFix">Fixing</option>
-                <option value="ResDrive">Driving</option>
+                <option value="ResTow">ResTow</option>
+                <option value="ResFix">ResFix</option>
+                <option value="ResDrive">ResDrive</option>
               </select>
             </div>
           </div>
@@ -230,12 +230,16 @@ const RescueReQs = ({ partner }) => {
                       >
                         Detail
                       </button>
-                      <button
-                        className="bg-white border border-gray-400 rounded-full h-6 w-8 flex items-center justify-center"
-                        onClick={() => handleEdit(req)}
-                      >
-                        <img src="/images/icon-web/edit.png" className="w-4 h-4" alt="edit" />
-                      </button>
+                      {
+                        ["pending", "on trip"].includes(req.reqStatus?.toLowerCase()) && (
+                          <button
+                            className="bg-white border border-gray-400 rounded-full h-6 w-8 flex items-center justify-center"
+                            onClick={() => handleEdit(req)}
+                          >
+                            <img src="/images/icon-web/edit.png" className="w-4 h-4" alt="edit" />
+                          </button>
+                        )
+                      }
                     </div>
                   </td>
                 </tr>

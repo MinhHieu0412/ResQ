@@ -14,7 +14,9 @@ public class RequestResQMapper {
         dto.setStartTime(requestRescue.getStartTime());
         dto.setEndTime(requestRescue.getEndTime());
         dto.setULocation(requestRescue.getULocation());
+        dto.setDestination(requestRescue.getDestination());
         dto.setReqStatus(requestRescue.getStatus());
+        dto.setCustomerId(requestRescue.getUser().getUserId());
 
         // Lấy dữ liệu từ User liên kết
         if (requestRescue.getUser() != null) {
@@ -34,9 +36,9 @@ public class RequestResQMapper {
         RequestRescue requestRescue = new RequestRescue();
         requestRescue.setRescueType(dto.getRescueType());
         requestRescue.setULocation(dto.getULocation());
+        requestRescue.setDestination(dto.getDestination());
+        requestRescue.setCreatedAt(dto.getCreatedAt());
         requestRescue.setDescription(dto.getDescription());
-        requestRescue.setStartTime(dto.getStartTime());
-        requestRescue.setRescueType(dto.getRescueType());
         requestRescue.setNote(dto.getNote());
         return requestRescue;
     }

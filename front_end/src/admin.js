@@ -85,3 +85,13 @@ export const serviceAPI = {
 export const extraSrvAPI = {
   findExtrasByResResQ: (rrId) => adminApi.get(`/extraSrv/searchByReqResQ/${rrId}`),
 }
+
+/*PAYMENT*/
+export const paymentAPI = {
+  customerPayments: (customerId) => adminApi.get(`/payments/getCustomerPayments/${customerId}`),
+}
+
+/*REQUEST SERVICE*/
+export const requestSrvAPI = {
+  getRequestServices: (rrId) => adminApi.get(`/requestServices/getByResquest/${rrId}`),
+}

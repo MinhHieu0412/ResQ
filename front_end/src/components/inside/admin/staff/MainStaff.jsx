@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { getUserStatus } from "../../utils/StatusStyle";
 import { staffAPI } from "../../../../admin";
 import StaffDetail from "./StaffDetail";
@@ -73,10 +72,7 @@ const MainStaff = () => {
 
   const filteredAndSortedStaffs = [...staffs]
     .filter((staff) => {
-      if (statusFilter === "Other") {
-        return !["Waiting", "Active", "Deactive", "Blocked"].includes(staff.status);
-      }
-      return statusFilter ? staff.status === statusFilter : true;
+      return statusFilter ? staff.status.toLowerCase() === statusFilter.toLowerCase() : true;
     })
     .sort((a, b) => {
       if (!sortField) return 0;
@@ -142,10 +138,10 @@ const MainStaff = () => {
               >
                 <option value="">--- Status ---</option>
                 <option value="Waiting">Waiting</option>
-                <option value="Blocked">Blocked</option>
                 <option value="Active">Active</option>
                 <option value="Deactive">Deactive</option>
-                <option value="Other">Other</option>
+                <option value="24h">24h</option>
+                <option value="Blocked">Blocked</option>
               </select>
             </div>
           </div>

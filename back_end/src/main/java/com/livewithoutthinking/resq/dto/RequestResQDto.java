@@ -4,16 +4,19 @@ import com.livewithoutthinking.resq.entity.Partner;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 @Data
 public class RequestResQDto {
     int rrid;
+    int customerId;
     String partnerName;
     String partnerPhone;
     String userName;
     String userPhone;
     String uLocation;
+    String destination;
     String reqStatus;
     String rescueType;
     String cancelNote;
@@ -22,9 +25,12 @@ public class RequestResQDto {
     String currency;
     String description;
     String note;
+    Date createdAt;
     Date startTime;
     Date endTime;
+    double fixedPrice;
+    double distancePrice;
     double totalPrice;
+    double total;
     double appFee;
-    MultipartFile image;
 }

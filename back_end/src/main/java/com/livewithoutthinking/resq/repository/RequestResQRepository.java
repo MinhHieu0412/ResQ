@@ -9,22 +9,22 @@ import org.springframework.security.core.parameters.P;
 import java.util.List;
 
 public interface RequestResQRepository extends JpaRepository<RequestRescue, Integer> {
-    @Query("SELECT rr FROM RequestRescue rr WHERE rr.partner.partnerId = :partnerId")
+    @Query("SELECT rr FROM RequestRescue rr WHERE rr.partner.partnerId = :partnerId ORDER BY rr.createdAt DESC")
     List<RequestRescue> searchByPartner(int partnerId);
 
-    @Query("SELECT rr FROM RequestRescue rr WHERE rr.user.userId = :userId")
+    @Query("SELECT rr FROM RequestRescue rr WHERE rr.user.userId = :userId ORDER BY rr.createdAt DESC")
     List<RequestRescue> searchByUser(int userId);
 
     @Query("SELECT rr FROM RequestRescue rr WHERE rr.uLocation LIKE :keyword OR rr.user.fullName LIKE :keyword OR " +
-            "rr.partner.user.fullName LIKE :keyword")
+            "rr.partner.user.fullName LIKE :keyword ORDER BY rr.createdAt DESC")
     List<RequestRescue>searchRR(String keyword);
 
     @Query("SELECT rr FROM RequestRescue rr WHERE (rr.uLocation LIKE :keyword OR rr.partner.user.fullName LIKE :keyword) AND " +
-            "rr.user.userId = :userId")
+            "rr.user.userId = :userId ORDER BY rr.createdAt DESC")
     List<RequestRescue>searchRRWithUser(int userId, String keyword);
 
     @Query("SELECT rr FROM RequestRescue rr WHERE (rr.uLocation LIKE :keyword OR rr.user.fullName LIKE :keyword) AND " +
-            "rr.partner.partnerId = :partnerId")
+            "rr.partner.partnerId = :partnerId ORDER BY rr.createdAt DESC")
     List<RequestRescue>searchRRWithPartner(int partnerId, String keyword);
 
     @Query("SELECT count(r) FROM RequestRescue r WHERE r.user.userId = :userId")

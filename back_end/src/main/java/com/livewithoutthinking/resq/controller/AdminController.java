@@ -1,4 +1,5 @@
 package com.livewithoutthinking.resq.controller;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.livewithoutthinking.resq.dto.*;
 import com.livewithoutthinking.resq.entity.*;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,9 +39,11 @@ public class AdminController {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private PasswordEncoder encoder;
-    @Autowired
     private SrvService serviceSrv;
+    @Autowired
+    private PaymentService paymentSrv;
+    @Autowired
+    private RequestSrvService requestServiceSrv;
 
     //==================FEEDBACK SECTION==================
     @GetMapping("/feedbacks")
@@ -235,8 +237,6 @@ public class AdminController {
             if (userDto.getPassword() == null || userDto.getPassword().trim().isEmpty()) {
                 userDto.setPassword(oldUserOpt.get().getPassword());
             }
-            System.out.println(oldUserOpt.get().getPassword());
-            System.out.println(userDto.getPassword());
             Map<String, String> errors = validateUserDto(userDto);
             if (!errors.isEmpty()) {
                 return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
@@ -329,61 +329,67 @@ public class AdminController {
         return ok(reqResQSrv.existedRecords(rrId));
     }
 
-//    @PreAuthorize("hasRole('ADMIN')")
-//    @PostMapping("/reqResQs/createRequest")
-//    public ResponseEntity<?> createRequest(
-//            @RequestPart String requestDtoString,
-//            @RequestParam(value = "avatar", required = false) MultipartFile image) {
-//        try {
-//            ObjectMapper mapper = new ObjectMapper();
-//            RequestResQDto requestDto = mapper.readValue(requestDtoString, RequestResQDto.class);
-////            Map<String, String> errors = validateUserDto(RequestResQDto);
-////            String existedMessage = userExists(RequestResQDto);
-////            if(existedMessage != null){
-////                return ResponseEntity
-////                        .status(HttpStatus.CONFLICT)
-////                        .body(ApiResponse.conflictData(null, existedMessage));
-////            }
-////            if (!errors.isEmpty()) {
-////                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
-////            }
-//
-//            Staff newRequest = reqResQSrv.createNew(RequestResQDto, image);
-//            return ResponseEntity.ok(newRequest);
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().body("Error creating manager: " + e.getMessage());
-//        }
-//    }
-//    @PreAuthorize("hasRole('ADMIN')")
-//    @PutMapping("/managers/{managerId}")
-//    public ResponseEntity<?> updateManager(
-//            @PathVariable int managerId,
-//            @RequestPart String userDtoString,
-//            @RequestParam(value = "avatar", required = false) MultipartFile avatar) {
-//
-//        try {
-//            ObjectMapper mapper = new ObjectMapper();
-//            UserDto userDto = mapper.readValue(userDtoString, UserDto.class);
-//
-//            if (userDto.getUserid() == 0) {
-//                userDto.setUserid(managerId);
-//            }
-//            Map<String, String> errors = validateUserDto(userDto);
-//            if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
-//                boolean correctPassword = checkCurrentPassword(managerId, userDto);
-//                if (!correctPassword) {
-//                    errors.put("currentPassword", "Current password is incorrect");
-//                    return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
-//                }
-//            }
-//            UserDto updated = userSrv.updateStaff(userDto, avatar);
-//            return ResponseEntity.ok(updated);
-//        } catch (Exception e) {
-//            return ResponseEntity
-//                    .badRequest()
-//                    .body("Error updating manager: " + e.getMessage());
-//        }
-//    }
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/reqResQs/createRequest")
+    public ResponseEntity<?> createRequest(
+            @RequestPart String requestDtoString,
+            @RequestPart(required = false) String selectedServices) {
+        try{
+            System.out.println(selectedServices);
+            ObjectMapper mapper = new ObjectMapper();
+            RequestResQDto dto = mapper.readValue(requestDtoString, RequestResQDto.class);
+            Map<String, String> errors = validateRequestDto(dto);
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
+            }
+            RequestRescue requestRescue = reqResQSrv.createNew(dto);
+            List<Integer> serviceIds = new ArrayList<>();
+            if (selectedServices != null && !selectedServices.isEmpty()) {
+                serviceIds = mapper.readValue(selectedServices, new TypeReference<List<Integer>>() {});
+            }
+            requestServiceSrv.createRequestServices(serviceIds,requestRescue);
+            return ResponseEntity.ok(requestRescue);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error creating request: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/reqResQs/{requestId}")
+    public ResponseEntity<?> updateManager(
+            @PathVariable int requestId,
+            @RequestPart String requestDtoString) {
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            RequestResQDto resQDto = mapper.readValue(requestDtoString, RequestResQDto.class);
+            if (resQDto.getRrid() == 0) {
+                resQDto.setRrid(requestId);
+            }
+            Map<String, String> errors = validateRequestDto(resQDto);
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
+            }
+            RequestRescue updated = reqResQSrv.updateRequest(resQDto);
+            return ResponseEntity.ok("OK");
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Error updating request: " + e.getMessage());
+        }
+    }
+
+    //Payment
+    @GetMapping("/payments/getCustomerPayments/{customerId}")
+    public ResponseEntity<List<PaymentDto>> getCustomerPayments(@PathVariable("customerId") int customerId) {
+        return ok(paymentSrv.customerPayments(customerId));
+    }
+
+    //RequestServices
+    @GetMapping("/requestServices/getByResquest/{rrid}")
+    public ResponseEntity<List<RequestService>> getReqSrvByResquest(@PathVariable("rrid") int rrid) {
+        return ok(requestServiceSrv.getReqSrvByResquest(rrid));
+    }
 
     //Support
     private <T> ResponseEntity<T> ok(T body) {
@@ -391,7 +397,7 @@ public class AdminController {
     }
 
     //Validation
-    public Map<String, String> validateUserDto(UserDto dto) {
+    private Map<String, String> validateUserDto(UserDto dto) {
         Map<String, String> errors = new LinkedHashMap<>();
 
         // Full name
@@ -439,7 +445,7 @@ public class AdminController {
         return errors;
     }
 
-    public String userExists(UserDto dto) {
+    private String userExists(UserDto dto) {
         List<User> users = userRepository.findAll();
         for (User user : users) {
             if(user.getSdt().equals(dto.getSdt())){
@@ -456,6 +462,32 @@ public class AdminController {
             }
         }
         return null;
+    }
+
+    private Map<String, String> validateRequestDto(RequestResQDto dto) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        if(dto.getCustomerId() <= 0) {
+            errors.put("customerId", "Customer is required");
+        }
+        if(dto.getULocation() == null || dto.getULocation().trim().isEmpty()) {
+            errors.put("ulocation", "Customer's location is required");
+        }
+        if(dto.getRescueType() == null || dto.getRescueType().trim().isEmpty()) {
+            errors.put("rescueType", "Service is required");
+        }
+        if(dto.getTotal() <= 0) {
+            errors.put("specificSrv", "Specific service is required");
+        }
+        if(dto.getTotal() <= 0) {
+            errors.put("specificSrv", "Specific service is required");
+        }
+        if(dto.getPaymentMethod() == null || dto.getPaymentMethod().trim().isEmpty()) {
+            errors.put("paymentMethod", "Payment method is required");
+        }
+        if(dto.getDestination() == null || dto.getDestination().trim().isEmpty()) {
+            errors.put("destination", "Destination is required");
+        }
+        return errors;
     }
 
 }

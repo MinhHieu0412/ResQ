@@ -29,6 +29,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private NotificationRepository notificationRepo;
     @Autowired
+    private NotificationTemplateRepository notifTemplateRepo;
+    @Autowired
+    private PaymentRepository paymentRepo;
+    @Autowired
     private PasswordEncoder encoder;
 
     public List<UserDto> findAllCustomers() {
@@ -92,22 +96,25 @@ public class CustomerServiceImpl implements CustomerService {
         newCus.setStatus("Waiting");
         newCus.setRole(role);
         newCus.setCreatedAt(new Date());
-
         User savedCus = customerRepo.save(newCus);
 
+        Payment cashPayment = new Payment();
+        cashPayment.setName("CASH");
+        cashPayment.setUser(newCus);
+        cashPayment.setDefault(true);
+        cashPayment.setCreatedAt(new Date());
+        cashPayment.setStatus("WAITING");
+        paymentRepo.save(cashPayment);
+
+        NotificationTemplate notiTemplate = notifTemplateRepo.findByNotiType("NOTI");
+
         Notification noti = new Notification();
+        noti.setNotificationTemplate(notiTemplate);
         noti.setUser(newCus);
-        noti.setCreatedAt(new Date());
+        noti.setCreatedAt(new Date())   ;
         noti.setMessage("Welcome to ResQ! Your default password is $resQ2025" +
                 "We recommend changing it immediately to keep your account secure!");
         notificationRepo.save(noti);
-        try {
-            notificationRepo.save(noti);
-            System.out.println("Notification saved!");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         return savedCus;
     }
 }

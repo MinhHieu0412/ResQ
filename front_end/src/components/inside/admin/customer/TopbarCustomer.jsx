@@ -1,4 +1,8 @@
-const TopbarCustomer = ({ activeKey, onSelect, onBack }) => {
+import { useState } from "react";
+
+useState
+
+const TopbarCustomer = ({ activeKey, onSelect, onBack, selectedCustomer }) => {
   const buttons = [
     { label: "Information", key: "information" },
     { label: "History", key: "history" },
@@ -6,6 +10,10 @@ const TopbarCustomer = ({ activeKey, onSelect, onBack }) => {
     { label: "Violations", key: "violations" },
     { label: "Documents", key: "documents" },
   ];
+  
+  const [confirm, setConfirm] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [result, setResult] = useState(false);
 
   return (
     <div className="w-full mt-4 ">
@@ -16,22 +24,27 @@ const TopbarCustomer = ({ activeKey, onSelect, onBack }) => {
           <img alt="Back" src="/images/icon-web/Reply Arrow1.png" className="w-7 m-auto" />
         </button>
       </div>
-    <div className="flex flex-row space-x-10 justify-center items-center">
-      {buttons.map((btn) => (
-        <button
-          key={btn.key}
-          onClick={() => onSelect(btn.key)}
-          className={`w-btn-customer py-1.5 transition font-roboto px-4
-            ${
-              activeKey === btn.key
+      <div className="flex flex-row space-x-10 justify-center items-center mt-2">
+        {buttons.map((btn) => (
+          <button
+            key={btn.key}
+            onClick={() => onSelect(btn.key)}
+            className={`w-btn-customer py-1.5 transition font-roboto px-4
+            ${activeKey === btn.key
                 ? "bg-blue-900 text-white"
                 : "btn-active-customer"
-            }`}
-        >
+              }`}
+          >
             {btn.label}
-        </button>
-      ))}
-    </div>
+          </button>
+        ))}
+        {selectedCustomer?.status === "Waiting" &&
+          <button onClick={() => setConfirm(true)}
+            className="fixed bottom-20 right-9 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-full shadow-lg">
+            Verify Customer
+          </button>
+        }
+      </div>
     </div>
   );
 };

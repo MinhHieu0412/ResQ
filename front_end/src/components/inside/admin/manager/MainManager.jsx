@@ -75,10 +75,7 @@ const MainManager = () => {
 
   const filteredAndSortedManagers = [...managers]
     .filter((manager) => {
-      if (statusFilter === "Other") {
-        return !["Waiting", "Active", "Deactive", "Blocked"].includes(manager.status);
-      }
-      return statusFilter ? manager.status === statusFilter : true;
+      return statusFilter ? manager.status.toLowerCase() === statusFilter.toLowerCase() : true;
     })
     .sort((a, b) => {
       if (!sortField) return 0;
@@ -144,10 +141,10 @@ const MainManager = () => {
               >
                 <option value="">--- Status ---</option>
                 <option value="Waiting">Waiting</option>
-                <option value="Blocked">Blocked</option>
                 <option value="Active">Active</option>
                 <option value="Deactive">Deactive</option>
-                <option value="Other">Other</option>
+                <option value="24h">24h</option>
+                <option value="Blocked">Blocked</option>
               </select>
             </div>
           </div>

@@ -15,7 +15,7 @@ public class RequestRescue {
     private int rrid; 
 
     @ManyToOne
-    @JoinColumn(name = "PartnerID", referencedColumnName = "PartnerID", nullable = false)
+    @JoinColumn(name = "PartnerID", referencedColumnName = "PartnerID", nullable = true)
     private Partner partner; // Liên kết với bảng Partner (khóa ngoại PartnerID)
 
     @ManyToOne
@@ -39,8 +39,8 @@ public class RequestRescue {
     @Column(name = "ULocation")
     private String uLocation; // Vị trí người yêu cầu
 
-    @Column(name = "PLocation")
-    private String pLocation; // Vị trí đối tác
+    @Column(name = "Destination")
+    private String destination; // Vị trí đối tác
 
     @Column(name = "CancelNote")
     private String cancelNote; // Ghi chú hủy yêu cầu cứu hộ

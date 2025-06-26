@@ -22,6 +22,9 @@ public class Notification {
     @Column(name = "Message")
     private String message; // Tin nhắn thông báo
 
+    @Column(name = "ViewStatus")
+    private Boolean viewStatus;
+
     @Column(name = "Created_at", updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt; // Thời gian tạo thông báo
@@ -29,6 +32,11 @@ public class Notification {
     @Column(name = "Updated_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt; // Thời gian cập nhật thông báo
+
+    @ManyToOne
+    @JoinColumn(name = "NotificationTemplateID", referencedColumnName = "NotificationTemplateID")
+    private NotificationTemplate notificationTemplate;
+
 
     // Constructor, Getters, Setters và các phương thức khác nếu cần
 }
