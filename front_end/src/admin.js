@@ -95,3 +95,14 @@ export const paymentAPI = {
 export const requestSrvAPI = {
   getRequestServices: (rrId) => adminApi.get(`/requestServices/getByResquest/${rrId}`),
 }
+
+/*PERSONAL DATA*/
+export const personalDataAPI = {
+  getUnverifiedUserData: (customerId) => adminApi.get(`/personalDatas/getUnverifiedUserData/${customerId}`),
+}
+
+/*DOCUMENT*/
+export const documentAPI = {
+  getUnverifiedPartnerDoc: (partnerId) => adminApi.get(`/documents/getUnverifiedPartnerDoc/${partnerId}`),
+  updatePartnerDoc: (partnerId, rejectData) => adminApi.put(`/documents/updatePartnerDoc/${partnerId}`, rejectData)
+}

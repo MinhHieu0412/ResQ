@@ -44,6 +44,10 @@ public class AdminController {
     private PaymentService paymentSrv;
     @Autowired
     private RequestSrvService requestServiceSrv;
+    @Autowired
+    private DocumentaryService documentSrv;
+    @Autowired
+    private PersonalDataService personalDataSrv;
 
     //==================FEEDBACK SECTION==================
     @GetMapping("/feedbacks")
@@ -389,6 +393,43 @@ public class AdminController {
     @GetMapping("/requestServices/getByResquest/{rrid}")
     public ResponseEntity<List<RequestService>> getReqSrvByResquest(@PathVariable("rrid") int rrid) {
         return ok(requestServiceSrv.getReqSrvByResquest(rrid));
+    }
+
+    //Document
+    @GetMapping("/documents/getUnverifiedPartnerDoc/{partnerId}")
+    public ResponseEntity<List<Documentary>> getUnverifiedPartnerDoc(@PathVariable("partnerId") int partnerId) {
+        return ok(documentSrv.getUnverifiedPartnerDoc(partnerId));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/documents/updatePartnerDoc/{partnerId}")
+    public ResponseEntity<?> updatePartnerDoc(@PathVariable("partnerId") int partnerId,
+           @RequestBody VerifiedUserDto rejectData) {
+        try {
+            Map<String, String> errors = new HashMap<>();
+            System.out.println("Reason:"+rejectData.getReason());
+            if(rejectData.getReason() == null || rejectData.getReason().trim().isEmpty()) {
+                errors.put("reason","Reason is required!");
+            }
+            if(rejectData.getDocumentTypes().size() <= 0) {
+                errors.put("selectedDocuments","Please select at least one invalid document!");
+            }
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
+            }
+            documentSrv.rejectPartnet(rejectData.getDocumentTypes(), partnerId, rejectData.getReason());
+            return ResponseEntity.ok("OK");
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Err"+e.getMessage());
+        }
+    }
+
+    //Personal Data
+    @GetMapping("/personalDatas/getUnverifiedUserData/{customerId}")
+    public ResponseEntity<PersonalData> getUnverifiedUserData(@PathVariable("customerId") int customerId) {
+        return ok(personalDataSrv.getUnverifiedUserData(customerId));
     }
 
     //Support

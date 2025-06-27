@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { partnerAPI } from "../../../../admin";
+import { partnerAPI, documentAPI } from "../../../../admin";
 
 const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartner, onBack, onReload }) => {
   const buttons = [
@@ -12,29 +12,23 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
   ];
 
 
-  const services = [
-    { srvId: 1, srvName: "Rửa xe", srvPrice: 50000 },
-    { srvId: 2, srvName: "Thay nhớt", srvPrice: 150000 },
-    { srvId: 3, srvName: "Kiểm tra động cơ", srvPrice: 100000 },
-    { srvId: 4, srvName: "Bảo dưỡng tổng quát", srvPrice: 250000 },
-  ];
 
   const [confirm, setConfirm] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [reject, setReject] = useState(false);
   const [result, setResult] = useState(false);
-  const [reasonText, setReasonText] = useState('');
-  const [selectedServices, setSelectedServices] = useState([]);
+  const [isApprove, setIsApprove] = useState(false);
 
+  {/*Update reason text with specific document*/ }
   const handleCheckboxChange = (e, srvName) => {
     const isChecked = e.target.checked;
     let updated = [];
     if (isChecked) {
-      updated = [...selectedServices, srvName];
+      updated = [...selectedDocuments, srvName];
     } else {
-      updated = selectedServices.filter(name => name !== srvName);
+      updated = selectedDocuments.filter(name => name !== srvName);
     }
-    setSelectedServices(updated);
+    setSelectedDocuments(updated);
 
     if (updated.length > 0) {
       const serviceList = updated.join(', ');
@@ -44,17 +38,30 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
     }
   };
 
+  {/*Gets partner upload documents that need to verify*/ }
+  const [documents, setDocuments] = useState([]);
+  const getCheckedDocuments = async () => {
+    try {
+      const response = await documentAPI.getUnverifiedPartnerDoc(selectedPartner.partnerId);
+      setDocuments(response.data);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  {/*Approve Partner Function*/ }
   const approvePartner = async (partner) => {
     try {
       await partnerAPI.approveParnter(partner.partnerId);
       setResult(true);
       setConfirm(false);
       setIsSuccess(true);
-
+      setIsApprove(true);
       const updatedPartner = await partnerAPI.findById(partner.partnerId);
       setSelectedPartner(updatedPartner.data);
       setTimeout(() => {
         setResult(false);
+        setIsApprove(false);
         onReload();
       }, 3000);
     } catch (error) {
@@ -66,6 +73,49 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
       }, 3000);
     }
   };
+
+  const [reasonText, setReasonText] = useState('');
+  const [selectedDocuments, setSelectedDocuments] = useState([]);
+  const [errors, setErrors] = useState({});
+  {/*Reject Partner Function*/ }
+  const submitReject = async () => {
+    try {
+      const payload = {
+        documentTypes: selectedDocuments,
+        reason: reasonText
+      };
+      await documentAPI.updatePartnerDoc(selectedPartner.partnerId, payload);
+      await getCheckedDocuments();
+      setResult(true);
+      setIsSuccess(true);
+      setReject(false);
+      setConfirm(false);
+      setErrors({});
+      const updatedPartner = await partnerAPI.findById(selectedPartner.partnerId);
+      setSelectedPartner(updatedPartner.data);
+      setTimeout(() => {
+        setResult(false);
+        setIsSuccess(false);
+        onReload();
+      }, 3000);
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        const { errors } = error.response.data;
+        setErrors(errors);
+      } else {
+        console.error("Reject partner failed:", error);
+        setResult(true);
+        setIsSuccess(false);
+        setTimeout(() => {
+          setResult(false);
+        }, 3000);
+      }
+    }
+  };
+
+  useEffect(() => {
+    getCheckedDocuments();
+  }, [])
 
   return (
     <div>
@@ -117,13 +167,14 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
             ))}
           </div>
         </div>
-        {!selectedPartner?.verificationStatus &&
+        {!selectedPartner?.verificationStatus && documents.length > 0 &&
           <button onClick={() => setConfirm(true)}
             className="fixed bottom-20 right-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-full shadow-lg">
             Verify Partner
           </button>
         }
       </div>
+      {/*SELECT VERIFIED OPTION*/}
       {confirm &&
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
           <div className="relative bg-white text-black px-10 py-4 rounded-lg shadow-lg text-lg">
@@ -148,6 +199,7 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
           </div>
         </div>
       }
+      {/*REJECT + REASON*/}
       {reject && (
         <div class="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
           <div className="relative bg-white text-black px-10 py-6 rounded-xl shadow-lg w-[40vw]">
@@ -155,39 +207,54 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
               className="absolute top-4 right-4 text-xl font-bold"
               onClick={() => {
                 setReject(false);
-                setReasonText('')
+                setReasonText('');
+                setSelectedDocuments([]);
+                setErrors({});
               }}
             >
               ✖
             </button>
             <h2 className="text-xl font-semibold mb-2 text-center text-red-600">REJECT PARTNER</h2>
             <h4 className="font-bold mt-5">Partner's Document</h4>
-            <div className="border border-gray-300 rounded-xl p-4 h-60 overflow-y-auto space-y-2">
-              {services.map((srv) => (
-                <label key={srv.srvId} className="block mb-1">
-                  <input
-                    type="checkbox"
-                    value={srv.srvId}
-                    onChange={(e) => handleCheckboxChange(e, srv.srvName)}
-                  />
-                  <span className="ml-2">{srv.srvName}</span>
-                </label>
-              ))}
-            </div>
-            <textarea
-              className="border rounded-lg p-2 w-full my-2 h-36"
-              placeholder="Reject partner resons"
-              value={reasonText}
-            ></textarea>
-            <button
-              //onclick={submitReject()}
-              class="bg-red-600 text-white px-5 py-2 rounded-full hover:bg-red-700 float-right">
-              Confirm Reject
-            </button>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault(); // Ngăn form reload trang
+                submitReject();
+              }}
+            >
+              <div className="border border-gray-300 rounded-xl p-4 h-60 overflow-y-auto space-y-2">
+                {documents.map((doc) => (
+                  <label key={doc.documentID} className="block mb-1">
+                    <input
+                      type="checkbox"
+                      value={doc.documentID}
+                      onChange={(e) => handleCheckboxChange(e, doc.documentType)}
+                    />
+                    <span className="ml-2">{doc.documentType}</span>
+                  </label>
+                ))}
+              </div>
+              {errors.selectedDocuments && <p className="text-red-500 text-sm mt-1">{errors.selectedDocuments}</p>}
+
+              <textarea
+                className="border rounded-lg p-2 w-full my-2 h-36"
+                placeholder="Reject partner reasons"
+                value={reasonText}
+                onChange={(e) => setReasonText(e.target.value)}
+              ></textarea>
+              {errors.reason && <p className="text-red-500 text-sm mt-1">{errors.reason}</p>}
+
+              <button
+                type="submit"
+                className="bg-red-600 text-white px-5 py-2 rounded-full hover:bg-red-700 float-right"
+              >
+                Confirm Reject
+              </button>
+            </form>
           </div>
         </div>
       )}
-
+      {/*NOTI*/}
       {result && (
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
           <div className="bg-white text-black px-10 py-6 rounded-xl shadow-lg text-center max-w-md">
@@ -207,11 +274,19 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
               className={`text-xl font-semibold mb-2 ${isSuccess ? 'text-green-700' : 'text-red-700'
                 }`}
             >
-              {isSuccess ? "Partner Approved Successfully!" : "Partner Approval Failed!"}
+              {isSuccess ?
+                (isApprove ? "Approve Partner Success!" : "Reject Partner Success!")
+                : "Verify Partner Failed!"
+              }
             </h2>
             {isSuccess && (
               <p className="text-gray-600">
-                You have approved partner <strong>{selectedPartner?.fullName}</strong>.
+                <span>
+                  {isApprove
+                    ? <>You have approved partner <strong>{selectedPartner?.fullName}</strong>.</>
+                    : <>You have rejected partner <strong>{selectedPartner?.fullName}</strong>.</>
+                  }
+                </span>
                 <br />
                 The partner will receive a notification.
               </p>
