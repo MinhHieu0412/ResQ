@@ -309,7 +309,7 @@ const Performance = ({ partner }) => {
                   </tr>
                   <tr>
                     <td className="detailTitle">Total Paid</td>
-                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(requestDetail.totalPrice)} {requestDetail.currency}</td>
+                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(requestDetail.total)} {requestDetail.currency}</td>
                   </tr>
                   <tr>
                     <td className="detailTitle">Payment Method</td>
@@ -371,11 +371,11 @@ const Performance = ({ partner }) => {
                   </tr>
                   <tr>
                     <td className="detailTitle">Total Before Extra Fee</td>
-                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(requestDetail.totalPrice - extraSrv.price)} {requestDetail.currency}</td>
+                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(requestDetail.total - extraSrv.price)} {requestDetail.currency}</td>
                   </tr>
                   <tr>
                     <td className="detailTitle">Total Paid</td>
-                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(requestDetail.totalPrice)} {requestDetail.currency}</td>
+                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(requestDetail.total)} {requestDetail.currency}</td>
                   </tr>
                   <tr>
                     <td className="detailTitle">Payment Method</td>

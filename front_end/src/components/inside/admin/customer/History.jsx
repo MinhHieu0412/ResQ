@@ -56,8 +56,8 @@ const History = ({ customer }) => {
       let valueA, valueB;
 
       if (sortField === "price") {
-        valueA = a.totalPrice ?? 0;
-        valueB = b.totalPrice ?? 0;
+        valueA = a.total ?? 0;
+        valueB = b.total ?? 0;
       } else if (sortField === "date") {
         valueA = new Date(a.startTime).getTime();
         valueB = new Date(b.startTime).getTime();
@@ -160,11 +160,10 @@ const History = ({ customer }) => {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="">--- Status ---</option>
-            <option value="New">New</option>
-            <option value="Waiting">Waiting</option>
-            <option value="Processing">Processing</option>
+            <option value="Pending">Pending</option>
+            <option value="On trip">On Trip</option>
             <option value="Completed">Completed</option>
-            <option value="Canceled">Canceled</option>
+            <option value="Cancelled">Cancelled</option>
           </select>
         </div>
         <div className="items-center border border-gray-300 rounded-full mt-[20px] h-[43px] w-36 ml-[2vw]">
@@ -222,7 +221,7 @@ const History = ({ customer }) => {
               <td>{his.ulocation}</td>
               <td className="text-center">{new Date(his.startTime).toLocaleString("vi-VN")}</td>
               <td className="text-center">
-                {new Intl.NumberFormat('vi-VN').format(his.totalPrice)} {his.currency}
+                {new Intl.NumberFormat('vi-VN').format(his.total)} {his.currency}
               </td>
               <td className="px-4 text-center">
                 <span className={`text-xs px-3 py-1 rounded-full ${getReqStatus(his.reqStatus)}`}>
@@ -334,7 +333,7 @@ const History = ({ customer }) => {
                   </tr>
                   <tr>
                     <td className="detailTitle">Total Paid</td>
-                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(detail.totalPrice)} {detail.currency}</td>
+                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(detail.total)} {detail.currency}</td>
                   </tr>
                   <tr>
                     <td className="detailTitle">Payment Method</td>
@@ -396,11 +395,11 @@ const History = ({ customer }) => {
                   </tr>
                   <tr>
                     <td className="detailTitle">Total Before Extra Fee</td>
-                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(detail.totalPrice - extraSrv.price)} {detail.currency}</td>
+                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(detail.total - extraSrv.price)} {detail.currency}</td>
                   </tr>
                   <tr>
                     <td className="detailTitle">Total Paid</td>
-                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(detail.totalPrice)} {detail.currency}</td>
+                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(detail.total)} {detail.currency}</td>
                   </tr>
                   <tr>
                     <td className="detailTitle">Payment Method</td>

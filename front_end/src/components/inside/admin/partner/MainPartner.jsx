@@ -205,10 +205,17 @@ const MainPartner = () => {
         <th className="w-[14%] px-2 whitespace-nowrap">
           Joined Date
           <button onClick={() => toggleSort("joined")}>
-            <img
-              src={`/images/icon-web/Chevron ${sortOrder === "asc" ? "Up" : "Down"}.png`}
-              className="h-3 ml-2 inline-block"
-            />
+            {sortField === "joined" ? (
+              <img
+                src={`/images/icon-web/Chevron ${sortOrder === "asc" ? "Up" : "Down"}.png`}
+                className="h-3 ml-2 inline-block"
+              />
+            ) : (
+              <img
+                src={`/images/icon-web/sort.png`}
+                className="h-3 ml-2 inline-block"
+              />
+            )}
           </button>
         </th>
         <th className="w-[6%] px-2">Action</th>
@@ -345,10 +352,10 @@ const MainPartner = () => {
                   <select className="mx-3 mt-2" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                     <option value="">--- Status ---</option>
                     <option value="Waiting">Waiting</option>
-                    <option value="Deactive">Deactive</option>
                     <option value="Active">Active</option>
-                    <option value="Block">Block</option>
-                    <option value="Other">Other</option>
+                    <option value="Deactive">Deactive</option>
+                    <option value="24h">24h</option>
+                    <option value="Blocked">Blocked</option>
                   </select>
                 </div>
                 {/* Filter Service */}

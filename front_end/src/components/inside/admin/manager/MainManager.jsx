@@ -100,7 +100,7 @@ const MainManager = () => {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       searchManagers();
-    },20);
+    }, 20);
     return () => clearTimeout(delayDebounce);
   }, [keyword]);
 
@@ -111,7 +111,7 @@ const MainManager = () => {
           manager={selectedManager}
           isEdit={isEdit} />
       ) : (selectedManager ? (
-        <ManagerDetail 
+        <ManagerDetail
           manager={selectedManager} onBack={handleBack} />
       ) : (
         <div>
@@ -159,12 +159,17 @@ const MainManager = () => {
                 <th className="w-[16%]">
                   Response Time
                   <button onClick={() => toggleSort("response")}>
-                    <img
-                      src={`/images/icon-web/Chevron ${sortField === "response" && sortOrder === "asc" ? "Down" : "Up"
-                        }.png`}
-                      className="h-3 ml-2 inline"
-                      alt="Sort Response Time"
-                    />
+                    {sortField === "response" ? (
+                      <img
+                        src={`/images/icon-web/Chevron ${sortOrder === "asc" ? "Up" : "Down"}.png`}
+                        className="h-3 ml-2 inline-block"
+                      />
+                    ) : (
+                      <img
+                        src={`/images/icon-web/sort.png`}
+                        className="h-3 ml-2 inline-block"
+                      />
+                    )}
                   </button>
                 </th>
                 <th className="w-[15%]">Action</th>

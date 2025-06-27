@@ -93,8 +93,8 @@ const RescueCalls = ({ partner }) => {
       let valueA, valueB;
 
       if (sortField === "price") {
-        valueA = a.totalPrice ?? 0;
-        valueB = b.totalPrice ?? 0;
+        valueA = a.total ?? 0;
+        valueB = b.total ?? 0;
       } else if (sortField === "date") {
         valueA = new Date(a.startTime).getTime();
         valueB = new Date(b.startTime).getTime();
@@ -150,10 +150,9 @@ const RescueCalls = ({ partner }) => {
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="" className="text-center">--- Status ---</option>
-            <option value="New">New</option>
-            <option value="Waiting">Waiting</option>
-            <option value="Processing">Processing</option>
-            <option value="canceled">Canceled</option>
+            <option value="Pending">Pending</option>
+            <option value="On trip">On trip</option>
+            <option value="cancelled">Cancelled</option>
             <option value="Completed">Completed</option>
           </select>
         </div>
@@ -214,7 +213,7 @@ const RescueCalls = ({ partner }) => {
                 {new Date(req.startTime).toLocaleString('vi-VN')}
               </td>
               <td className="text-center">
-                {req.totalPrice ? new Intl.NumberFormat('vi-VN').format(req.totalPrice) : 0} {req.currency}
+                {req.total ? new Intl.NumberFormat('vi-VN').format(req.total) : 0} {req.currency}
               </td>
               <td className="px-4">
                 <span
@@ -328,7 +327,7 @@ const RescueCalls = ({ partner }) => {
                   </tr>
                   <tr>
                     <td className="detailTitle">Total Paid</td>
-                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(detail.totalPrice)} {detail.currency}</td>
+                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(detail.total)} {detail.currency}</td>
                   </tr>
                   <tr>
                     <td className="detailTitle">Payment Method</td>
@@ -390,11 +389,11 @@ const RescueCalls = ({ partner }) => {
                   </tr>
                   <tr>
                     <td className="detailTitle">Total Before Extra Fee</td>
-                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(detail.totalPrice - extraSrv.price)} {detail.currency}</td>
+                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(detail.total - extraSrv.price)} {detail.currency}</td>
                   </tr>
                   <tr>
                     <td className="detailTitle">Total Paid</td>
-                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(detail.totalPrice)} {detail.currency}</td>
+                    <td className="detailContent">{new Intl.NumberFormat('vi-VN').format(detail.total)} {detail.currency}</td>
                   </tr>
                   <tr>
                     <td className="detailTitle">Payment Method</td>

@@ -97,7 +97,7 @@ const MainStaff = () => {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       searchStaffs();
-    },20);
+    }, 20);
     return () => clearTimeout(delayDebounce);
   }, [keyword]);
 
@@ -156,12 +156,17 @@ const MainStaff = () => {
                 <th className="w-[16%]">
                   Response Time
                   <button onClick={() => toggleSort("response")}>
-                    <img
-                      src={`/images/icon-web/Chevron ${sortField === "response" && sortOrder === "asc" ? "Up" : "Down"
-                        }.png`}
-                      className="h-3 ml-2 inline"
-                      alt="Sort Response Time"
-                    />
+                    {sortField === "response" ? (
+                      <img
+                        src={`/images/icon-web/Chevron ${sortOrder === "asc" ? "Up" : "Down"}.png`}
+                        className="h-3 ml-2 inline-block"
+                      />
+                    ) : (
+                      <img
+                        src={`/images/icon-web/sort.png`}
+                        className="h-3 ml-2 inline-block"
+                      />
+                    )}
                   </button>
                 </th>
                 <th className="w-[15%]">Action</th>

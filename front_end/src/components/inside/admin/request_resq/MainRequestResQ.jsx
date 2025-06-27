@@ -166,10 +166,9 @@ const RescueReQs = ({ partner }) => {
             <div className="items-center border border-gray-300 rounded-full mt-[2vh] h-[5vh] w-36 ml-[1vw]">
               <select className="mx-3 mt-2" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
                 <option value="">--- Status ---</option>
-                <option value="New">New</option>
-                <option value="Waiting">Waiting</option>
-                <option value="Processing">Processing</option>
-                <option value="Canceled">Canceled</option>
+                <option value="Pending">Pending</option>
+                <option value="On trip">On trip</option>
+                <option value="Cancelled">Cancelled</option>
                 <option value="Completed">Completed</option>
               </select>
             </div>
@@ -195,10 +194,17 @@ const RescueReQs = ({ partner }) => {
                 <th className="w-[11%]">
                   Total Price
                   <button onClick={() => toggleSort("price")}>
-                    <img
-                      src={`../../../../../public/images/icon-web/Chevron ${sortOrder === "asc" ? "Up" : "Down"}.png`}
-                      className="h-3 ml-2"
-                    />
+                    {sortField === "price" ? (
+                      <img
+                        src={`/images/icon-web/Chevron ${sortOrder === "asc" ? "Up" : "Down"}.png`}
+                        className="h-3 ml-2 inline-block"
+                      />
+                    ) : (
+                      <img
+                        src={`/images/icon-web/sort.png`}
+                        className="h-3 ml-2 inline-block"
+                      />
+                    )}
                   </button>
                 </th>
                 <th className="w-[10%]">Action</th>
