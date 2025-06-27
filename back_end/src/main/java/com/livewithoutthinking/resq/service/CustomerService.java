@@ -14,5 +14,5 @@ public interface CustomerService {
     List<UserDto> searchCustomers(String keyword);
     UserDashboard customerDashboard(int userId);
     User createNew(UserDto dto, MultipartFile avatar);
-
+    UserDto searchCustomerById(int customerId);
 }

@@ -76,6 +76,11 @@ public class AdminController {
         return ok(customerSrv.findAllCustomers());
     }
 
+    @GetMapping("/customer/searchCustomerById/{customerId}")
+    public ResponseEntity<UserDto> searchCustomerById(@PathVariable("customerId") int customerId) {
+        return ok(customerSrv.searchCustomerById(customerId));
+    }
+
     @GetMapping("/customers/searchCustomers/{keyword}")
     public ResponseEntity<List<UserDto>> searchCustomers(@PathVariable("keyword") String keyword) {
         return ok(customerSrv.searchCustomers(keyword));
@@ -417,7 +422,7 @@ public class AdminController {
             if (!errors.isEmpty()) {
                 return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
             }
-            documentSrv.rejectPartnet(rejectData.getDocumentTypes(), partnerId, rejectData.getReason());
+            documentSrv.rejectPartner(rejectData.getDocumentTypes(), partnerId, rejectData.getReason());
             return ResponseEntity.ok("OK");
         } catch (Exception e) {
             return ResponseEntity
@@ -430,6 +435,38 @@ public class AdminController {
     @GetMapping("/personalDatas/getUnverifiedUserData/{customerId}")
     public ResponseEntity<PersonalData> getUnverifiedUserData(@PathVariable("customerId") int customerId) {
         return ok(personalDataSrv.getUnverifiedUserData(customerId));
+    }
+
+    @PutMapping("/personalDatas/approvedCustomer/{customerId}")
+    public ResponseEntity<?> approveCustomer(@PathVariable("customerId") int customerId) {
+        try{
+            return ok(personalDataSrv.approvedCustomer(customerId));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Err"+e.getMessage());
+        }
+    }
+
+    @PutMapping("/personalDatas/rejectedCustomer/{customerId}")
+    public ResponseEntity<?> rejectCustomer(@PathVariable("customerId") int customerId,
+                                            @RequestBody VerifiedUserDto rejectData) {
+        try{
+            Map<String, String> errors = new HashMap<>();
+            if(rejectData.getReason() == null || rejectData.getReason().trim().isEmpty()) {
+                errors.put("reason","Reason is required!");
+            }
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
+            }
+            personalDataSrv.rejectedCustomer(customerId, rejectData.getReason());
+            return ResponseEntity.ok("OK");
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Err"+e.getMessage());
+        }
+
     }
 
     //Support

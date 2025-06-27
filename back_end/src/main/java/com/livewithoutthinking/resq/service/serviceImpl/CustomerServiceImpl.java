@@ -47,6 +47,13 @@ public class CustomerServiceImpl implements CustomerService {
         return dtos;
     }
 
+    public UserDto searchCustomerById(int customerId){
+        User user = customerRepo.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("user not found"));
+        UserDto dto = UserMapper.toDTO(user);
+        return dto;
+    }
+
     public Optional<User> findCustomerById(int userId) {
         return customerRepo.findById(userId);
     }

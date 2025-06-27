@@ -7,5 +7,5 @@ import java.util.List;
 public interface DocumentaryService {
     List<Documentary> findByPartnerId_PartnerId(Integer partnerId);
     List<Documentary> getUnverifiedPartnerDoc(Integer partnerId);
-    boolean rejectPartnet(List<String> documentTypes, int partnerId, String reason);
+    boolean rejectPartner(List<String> documentTypes, int partnerId, String reason);
 }

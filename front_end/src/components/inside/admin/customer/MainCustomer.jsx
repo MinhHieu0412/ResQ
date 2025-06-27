@@ -22,7 +22,7 @@ const MainCustomer = () => {
     try {
       const response = await customerAPI.getAllCustomers();
       let result = response.data;
-      setCountWaiting(response.data.filter(c => c.status === "Waiting").length);
+      setCountWaiting(response.data.filter(c => c.status.toLowerCase() === "waiting").length);
       setIsLoading(false);
       setCustomers(result);
       return result;
@@ -372,6 +372,7 @@ const MainCustomer = () => {
           <TopbarCustomer
             onBack={handleBack}
             selectedCustomer={selectedCustomer}
+            setSelectedCustomer={setSelectedCustomer}
             onSelect={setSelectedTab}
             activeKey={selectedTab}
             className="topbar-customer"

@@ -2,20 +2,17 @@ package com.livewithoutthinking.resq.service.serviceImpl;
 
 import com.livewithoutthinking.resq.dto.PartnerDto;
 import com.livewithoutthinking.resq.dto.UserDashboard;
-import com.livewithoutthinking.resq.entity.Bill;
-import com.livewithoutthinking.resq.entity.Partner;
-import com.livewithoutthinking.resq.entity.RequestRescue;
+import com.livewithoutthinking.resq.entity.*;
 import com.livewithoutthinking.resq.mapper.PartnerMapper;
-import com.livewithoutthinking.resq.repository.BillRepository;
-import com.livewithoutthinking.resq.repository.RequestResQRepository;
+import com.livewithoutthinking.resq.repository.*;
 import com.livewithoutthinking.resq.service.PartnerService;
-import com.livewithoutthinking.resq.repository.PartnerRepository;
 import com.livewithoutthinking.resq.service.FeedbackService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +24,12 @@ public class PartnerServiceImpl implements PartnerService {
     private RequestResQRepository requestResQRepo;
     @Autowired
     private BillRepository billRepo;
+    @Autowired
+    private NotificationTemplateRepository notiTemplateRepo;
+    @Autowired
+    private NotificationRepository notiRepo;
+    @Autowired
+    private DocumentaryRepository documentaryRepo;
 
     public List<PartnerDto> findAll(){
         List<Partner> partnerList =  partnerRepo.findAll();
@@ -80,7 +83,21 @@ public class PartnerServiceImpl implements PartnerService {
     public boolean approvePartner(int partnerId){
         Partner partner = partnerRepo.findPartnerById(partnerId);
         partner.setVerificationStatus(true);
-        partnerRepo.save(partner);
+        Partner savedPartner = partnerRepo.save(partner);
+        List<Documentary> unverifiedDocs = documentaryRepo.getUnverifiedPartnerDoc(partnerId);
+        for(Documentary doc : unverifiedDocs){
+            doc.setDocumentStatus("APPROVED");
+            documentaryRepo.save(doc);
+        }
+        if(savedPartner != null){
+            Notification notification = new Notification();
+            NotificationTemplate notiTemplate = notiTemplateRepo.findByNotiType("DOCUMENT_APPROVE");
+            notification.setNotificationTemplate(notiTemplate);
+            notification.setUser(partner.getUser());
+            notification.setMessage("We have successfully verified your documents. Now you have become our partner.");
+            notification.setCreatedAt(new Date());
+            notiRepo.save(notification);
+        }
         return true;
     }
 }

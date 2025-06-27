@@ -49,6 +49,7 @@ export const managerAPI = {
 /*CUSTOMER*/
 export const customerAPI = {
   getAllCustomers: () => adminApi.get('/customers'),
+  findCustomerById: (customerId) => adminApi.get(`/customer/searchCustomerById/${customerId}`),
   search: (keyword) => adminApi.get(`/customers/searchCustomers/${keyword}`),
   dashboard: (userId) => adminApi.get(`/customers/customerDashboard/${userId}`),
   createNew: (data) => adminApi.post('/customers/createCustomer', data),
@@ -99,6 +100,8 @@ export const requestSrvAPI = {
 /*PERSONAL DATA*/
 export const personalDataAPI = {
   getUnverifiedUserData: (customerId) => adminApi.get(`/personalDatas/getUnverifiedUserData/${customerId}`),
+  approveCustomer:(customerId) => adminApi.put(`/personalDatas/approvedCustomer/${customerId}`),
+  rejectCustomer:(customerId, rejectData) => adminApi.put(`/personalDatas/rejectedCustomer/${customerId}`, rejectData),
 }
 
 /*DOCUMENT*/

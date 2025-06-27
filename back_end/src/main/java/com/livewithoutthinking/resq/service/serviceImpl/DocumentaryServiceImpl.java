@@ -27,7 +27,7 @@ public class DocumentaryServiceImpl implements DocumentaryService {
     @Autowired
     private NotificationTemplateRepository notiTempRepo;
     @Autowired
-    private NotificationRepository notiReo;
+    private NotificationRepository notiRepo;
 
     public List<Documentary> findByPartnerId_PartnerId(Integer partnerId) {
         return documentaryRepo.findByPartnerId_PartnerId(partnerId);
@@ -36,7 +36,7 @@ public class DocumentaryServiceImpl implements DocumentaryService {
         return documentaryRepo.getUnverifiedPartnerDoc(partnerId);
     }
 
-    public boolean rejectPartnet(List<String> documentTypes, int partnerId, String reason) {
+    public boolean rejectPartner(List<String> documentTypes, int partnerId, String reason) {
         boolean isUpdated = false;
         List<Documentary> unverifiedDocs = documentaryRepo.getUnverifiedPartnerDoc(partnerId);
         Set<String> documentTypeSet = new HashSet<>(documentTypes);
@@ -62,7 +62,7 @@ public class DocumentaryServiceImpl implements DocumentaryService {
             notification.setUser(partner.getUser());
             notification.setMessage(reason);
             notification.setCreatedAt(new Date());
-            notiReo.save(notification);
+            notiRepo.save(notification);
         }
         return isUpdated;
     }
