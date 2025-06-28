@@ -18,6 +18,7 @@ public class StaffMapper {
         dto.setCreatedAt(staff.getUser().getCreatedAt());
         dto.setStatus(staff.getUser().getStatus());
         dto.setAddress(staff.getUser().getAddress());
+        dto.setResponseTime(staff.getAvgTime());
         return dto;
     }
 }

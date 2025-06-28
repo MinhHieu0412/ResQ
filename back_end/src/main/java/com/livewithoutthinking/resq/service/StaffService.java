@@ -12,6 +12,5 @@ public interface StaffService {
     List<StaffDto> findAllStaffs();
     Optional<Staff> findStaffById(int staffId);
     List<StaffDto> searchStaffs(String keyword);
-    Double avgResponseTime(int staffId);
     Staff createNew(UserDto dto, MultipartFile avatar);
 }

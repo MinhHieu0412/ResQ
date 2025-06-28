@@ -40,8 +40,6 @@ public class ManagerServiceImpl implements ManagerService {
         List<StaffDto> staffDtos = new ArrayList<StaffDto>();
         for (Staff staff : staffs) {
             StaffDto dto = StaffMapper.toDTO(staff);
-            Double responseTime = avgResponseTime(staff.getStaffId());
-            dto.setResponseTime((responseTime != null && responseTime > 0) ? responseTime : 0.0);
             staffDtos.add(dto);
         }
         return staffDtos;
@@ -56,42 +54,11 @@ public class ManagerServiceImpl implements ManagerService {
         List<StaffDto> staffDtos = new ArrayList<>();
         for(Staff staff : result){
             StaffDto staffDto = StaffMapper.toDTO(staff);
-            Double responseTime = avgResponseTime(staff.getStaffId());
-            staffDto.setResponseTime((responseTime != null && responseTime > 0) ? responseTime : 0.0);
             staffDtos.add(staffDto);
         }
         return staffDtos;
     }
 
-    public Double avgResponseTime(int staffId) {
-        double totalSeconds = 0.0;
-        int count = 0;
-
-        Optional<Staff> optionalStaff = managerRepo.findById(staffId);
-        if (optionalStaff.isEmpty()) return null;
-        Staff staff = optionalStaff.get();
-        int staffUserId = staff.getUser().getUserId();
-        List<Conversation> conversations = conversationRepo.findConversationsByStaffId(staffId);
-        if(conversations.isEmpty()) return null;
-        for (Conversation conversation : conversations) {
-            int userId = conversation.getSender().getUserId();
-
-            List<Message> messages = messageRepo.findByConversation(conversation.getConversationId());
-            messages.sort(Comparator.comparing(Message::getCreatedAt));
-
-            if (messages.size() >= 2) {
-                Message first = messages.get(0);
-                Message second = messages.get(1);
-
-                if (first.getSender().getUserId() == userId && second.getSender().getUserId() == staffUserId) {
-                    Duration diff = Duration.between(first.getCreatedAt().toInstant(), second.getCreatedAt().toInstant());
-                    totalSeconds += diff.getSeconds();
-                    count++;
-                }
-            }
-        }
-        return count == 0 ? 0.0 : totalSeconds / count / 60.0;
-    }
 
     public Staff createNew(UserDto dto, MultipartFile avatar){
         User newUser = new User();
