@@ -194,7 +194,6 @@ const MainCustomer = () => {
           </button>
         </th>
         <th>Status</th>
-        <th>Verfied</th>
         <th>Action</th>
       </tr>
     </thead>
@@ -216,12 +215,6 @@ const MainCustomer = () => {
           <td>
             <p className={`text-xs py-1 w-20 h-6 rounded-3xl text-center mx-auto ${getUserStatus(cus.status)}`}>
               {cus.status}
-            </p>
-          </td>
-          <td>
-            <p className={`py-1 w-10 h-6 font-semibold text-center mx-auto 
-               ${cus.status.toLowerCase() === "waiting" ? 'text-red-700' : 'text-green-700'}`}>
-              {cus.status.toLowerCase() === "waiting" ? "NO" : "YES"}
             </p>
           </td>
           <td>

@@ -81,8 +81,21 @@ public class PartnerServiceImpl implements PartnerService {
         return partnerDash;
     }
     public boolean approvePartner(int partnerId){
+        boolean isNew = false;
         Partner partner = partnerRepo.findPartnerById(partnerId);
-        partner.setVerificationStatus(true);
+        if(!partner.isVerificationStatus()){
+            partner.setVerificationStatus(true);
+            isNew = true;
+        }
+        if(partner.getResTow() == 2){
+            partner.setResTow(1);
+        }
+        if(partner.getResDrive() == 2){
+            partner.setResDrive(1);
+        }
+        if(partner.getResFix() == 2){
+            partner.setResFix(1);
+        }
         Partner savedPartner = partnerRepo.save(partner);
         List<Documentary> unverifiedDocs = documentaryRepo.getUnverifiedPartnerDoc(partnerId);
         for(Documentary doc : unverifiedDocs){
@@ -94,7 +107,11 @@ public class PartnerServiceImpl implements PartnerService {
             NotificationTemplate notiTemplate = notiTemplateRepo.findByNotiType("DOCUMENT_APPROVE");
             notification.setNotificationTemplate(notiTemplate);
             notification.setUser(partner.getUser());
-            notification.setMessage("We have successfully verified your documents. Now you have become our partner.");
+            if(isNew){
+                notification.setMessage("We have successfully verified your documents. Now you have become our partner.");
+            }else{
+                notification.setMessage("Your request for new service has been verified.");
+            }
             notification.setCreatedAt(new Date());
             notiRepo.save(notification);
         }

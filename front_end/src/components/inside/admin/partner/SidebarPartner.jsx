@@ -11,8 +11,6 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
     { label: "Vehicles", key: "vehicles" },
   ];
 
-
-
   const [confirm, setConfirm] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [reject, setReject] = useState(false);
@@ -166,7 +164,8 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
             ))}
           </div>
         </div>
-        {!selectedPartner?.verificationStatus && documents.length > 0 &&
+        {(selectedPartner?.resTow == 2 || selectedPartner?.resDrive == 2 ||
+          selectedPartner?.resFix == 2) && documents.length > 0 &&
           <button onClick={() => setConfirm(true)}
             className="fixed bottom-20 right-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-full shadow-lg">
             Verify Partner
@@ -178,12 +177,32 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
           <div className="relative bg-white text-black px-10 py-4 rounded-lg shadow-lg text-lg">
             <button
-              className="absolute top-4 right-4 text-xl font-bold"
+              className="flex float-right top-4 right-4 text-xl font-bold"
               onClick={() => setConfirm(false)}
             >
               ✖
             </button>
-            <p className="font-lexend">Do you want to approve partner {selectedPartner?.fullName}?</p>
+            <div className="flex flex-col items-center gap-4 mt-8 text-center">
+              <p className="font-lexend text-lg font-semibold text-gray-800">
+                Do you want to approve partner <span className="text-blue-600">{selectedPartner?.fullName}</span>?
+              </p>
+              {["ResTow", "ResFix", "ResDrive"].filter((service, i) =>
+                [selectedPartner?.resTow, selectedPartner?.resFix, selectedPartner?.resDrive][i] === 2
+              ).length > 0 && (
+                  <p className="text-gray-600">
+                    The user would like to register for&nbsp;
+                    <span className="font-medium text-gray-900">
+                      {
+                        ["ResTow", "ResFix", "ResDrive"]
+                          .filter((service, i) => [selectedPartner?.resTow, selectedPartner?.resFix, selectedPartner?.resDrive][i] === 2)
+                          .join(" and ")
+                      }
+                    </span>
+                    .
+                  </p>
+                )}
+            </div>
+
             <div className="relative flex justify-center gap-5 mt-5">
               <button onClick={() => approvePartner(selectedPartner)}
                 className="bg-green-500 text-white px-4 py-2 rounded-3xl hover:bg-green-700 transition font-lexend">

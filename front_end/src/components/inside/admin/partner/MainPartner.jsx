@@ -38,7 +38,7 @@ const MainPartner = () => {
     try {
       const response = await partnerAPI.getAllPartners();
       let result = response.data;
-      setCountWaiting(response.data.filter(p => p.verificationStatus === false).length);
+      setCountWaiting(response.data.filter(p => p.verificationStatus === false || p.resTow == 2 || p.resDrive == 2 || p.resFix == 2).length);
       setIsLoading(false);
       for (const item of result) {
         try {
@@ -64,7 +64,7 @@ const MainPartner = () => {
     try {
       if (keyword.trim() === '') {
         if (approving) {
-          const waitingList = partners.filter(p => p.verificationStatus === false);
+          const waitingList = partners.filter(p => p.verificationStatus === false || p.resTow == 2 || p.resDrive == 2 || p.resFix == 2);
           setWaitingPartners(waitingList);
         } else {
           await fetchPartners();
@@ -73,7 +73,7 @@ const MainPartner = () => {
         const response = await partnerAPI.search(keyword);
         const searchResults = response.data;
         if (approving) {
-          const waitingList = searchResults.filter(p => p.verificationStatus === false);
+          const waitingList = searchResults.filter(p => p.verificationStatus === false || p.resTow == 2 || p.resDrive == 2 || p.resFix == 2);
           setWaitingPartners(waitingList);
         } else {
           setPartners(searchResults);
@@ -130,7 +130,7 @@ const MainPartner = () => {
     setStatusFilter('');
     setServiceFilter('');
     const result = await fetchPartners();
-    const waitingList = result.filter((p) => p.verificationStatus === false);
+    const waitingList = result.filter((p) => p.verificationStatus === false || p.resTow == 2 || p.resDrive == 2 || p.resFix == 2);
     setWaitingPartners(waitingList);
   };
 
@@ -200,7 +200,6 @@ const MainPartner = () => {
         </th>
         <th className="w-[13%] px-4">Service</th>
         <th className="w-[8%] px-2 whitespace-nowrap">Status</th>
-        <th className="w-[6%] px-2 whitespace-nowrap">Verified</th>
         <th className="w-[14%] px-2 whitespace-nowrap">
           Joined Date
           <button onClick={() => toggleSort("joined")}>
@@ -244,13 +243,6 @@ const MainPartner = () => {
               {part.status}
             </p>
           </td>
-          <td>
-            <p className={`py-1 w-10 h-6 font-semibold text-center mx-auto 
-               ${part.verificationStatus ? 'text-green-700' : 'text-red-700'}`}>
-              {part.verificationStatus ? "YES" : "NO"}
-            </p>
-          </td>
-
           <td className="text-center">
             {new Date(part.createdAt).toLocaleString('vi-VN')}
           </td>
