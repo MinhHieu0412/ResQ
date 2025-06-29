@@ -11,6 +11,7 @@ import java.util.Date;
 public class StaffDto {
     int staffId;
     int userId;
+    int monthLateCount;
     String fullName;
     String userName;
     String email;

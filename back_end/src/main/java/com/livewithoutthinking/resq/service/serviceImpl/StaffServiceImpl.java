@@ -22,16 +22,13 @@ public class StaffServiceImpl implements StaffService {
     @Autowired
     private StaffRepository staffRepo;
     @Autowired
-    private ConversationRepoisitory conversationRepo;
-    @Autowired
-    private MessageRepository messageRepo;
-    @Autowired
     private RoleRepository roleRepo;
     @Autowired
     private PasswordEncoder encoder;
 
     public List<StaffDto> findAllStaffs() {
-        List<Staff> staffs = staffRepo.findAllStaffs();
+        Role roleStaff = roleRepo.findByName("STAFF");
+        List<Staff> staffs = staffRepo.findAllStaffs(roleStaff.getRoleId());
         List<StaffDto> staffDtos = new ArrayList<StaffDto>();
         for (Staff staff : staffs) {
             StaffDto staffDto = StaffMapper.toDTO(staff);
@@ -45,7 +42,8 @@ public class StaffServiceImpl implements StaffService {
     }
 
     public List<StaffDto> searchStaffs(String keyword){
-        List<Staff> result = staffRepo.searchStaffs("%"+keyword+"%");
+        Role roleStaff = roleRepo.findByName("STAFF");
+        List<Staff> result = staffRepo.searchStaffs("%"+keyword+"%", roleStaff.getRoleId());
         List<StaffDto> staffDtos = new ArrayList<>();
         for(Staff staff : result){
             StaffDto staffDto = StaffMapper.toDTO(staff);

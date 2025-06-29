@@ -155,8 +155,24 @@ const MainManager = () => {
                 <th className="w-[15%]">Full Name</th>
                 <th className="w-[15%]">Phone No.</th>
                 <th className="w-[13%]">Email</th>
+                <th className="w-[11%]">
+                  Monthly Lates
+                  <button onClick={() => toggleSort("lates")}>
+                    {sortField === "lates" ? (
+                      <img
+                        src={`/images/icon-web/Chevron ${sortOrder === "asc" ? "Up" : "Down"}.png`}
+                        className="h-3 ml-2 inline-block"
+                      />
+                    ) : (
+                      <img
+                        src={`/images/icon-web/sort.png`}
+                        className="h-3 ml-2 inline-block"
+                      />
+                    )}
+                  </button>
+                </th>
                 <th className="w-[10%]">Status</th>
-                <th className="w-[16%]">
+                <th className="w-[11%]">
                   Response Time
                   <button onClick={() => toggleSort("response")}>
                     {sortField === "response" ? (
@@ -172,7 +188,7 @@ const MainManager = () => {
                     )}
                   </button>
                 </th>
-                <th className="w-[15%]">Action</th>
+                <th className="w-[10%]">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -182,6 +198,7 @@ const MainManager = () => {
                   <td>{manager.fullName}</td>
                   <td>{manager.sdt}</td>
                   <td>{manager.email}</td>
+                  <td className="text-center">{manager.monthLateCount}</td>
                   <td className="text-center ">
                     <span
                       className={`text-xs px-3 py-1 rounded-full ${getUserStatus(

@@ -152,6 +152,22 @@ const MainStaff = () => {
                 <th className="w-[15%]">Full Name</th>
                 <th className="w-[15%]">Phone No.</th>
                 <th className="w-[13%]">Email</th>
+                <th className="w-[16%]">
+                  Month Lates
+                  <button onClick={() => toggleSort("lates")}>
+                    {sortField === "lates" ? (
+                      <img
+                        src={`/images/icon-web/Chevron ${sortOrder === "asc" ? "Up" : "Down"}.png`}
+                        className="h-3 ml-2 inline-block"
+                      />
+                    ) : (
+                      <img
+                        src={`/images/icon-web/sort.png`}
+                        className="h-3 ml-2 inline-block"
+                      />
+                    )}
+                  </button>
+                </th>
                 <th className="w-[10%]">Status</th>
                 <th className="w-[16%]">
                   Response Time
@@ -179,6 +195,7 @@ const MainStaff = () => {
                   <td>{staff.fullName}</td>
                   <td>{staff.sdt}</td>
                   <td>{staff.email}</td>
+                  <td className="text-center">{staff.monthLateCount}</td>
                   <td className="text-center ">
                     <span
                       className={`text-xs px-3 py-1 rounded-full ${getUserStatus(

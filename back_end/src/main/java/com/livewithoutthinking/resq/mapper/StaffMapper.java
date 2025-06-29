@@ -19,6 +19,7 @@ public class StaffMapper {
         dto.setStatus(staff.getUser().getStatus());
         dto.setAddress(staff.getUser().getAddress());
         dto.setResponseTime(staff.getAvgTime());
+        dto.setMonthLateCount(staff.getMonthLateCount());
         return dto;
     }
 }

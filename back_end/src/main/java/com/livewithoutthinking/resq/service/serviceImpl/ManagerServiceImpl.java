@@ -25,7 +25,7 @@ public class ManagerServiceImpl implements ManagerService {
     @Autowired
     private UserRepository userRepo;
     @Autowired
-    private ManagerRepository managerRepo;
+    private StaffRepository managerRepo;
     @Autowired
     private ConversationRepoisitory conversationRepo;
     @Autowired
@@ -36,7 +36,8 @@ public class ManagerServiceImpl implements ManagerService {
     private PasswordEncoder encoder;
 
     public List<StaffDto> findAllManagers() {
-        List<Staff> staffs = managerRepo.findAllManagers();
+        Role roleManager = roleRepo.findByName("MANAGER");
+        List<Staff> staffs = managerRepo.findAllStaffs(roleManager.getRoleId());
         List<StaffDto> staffDtos = new ArrayList<StaffDto>();
         for (Staff staff : staffs) {
             StaffDto dto = StaffMapper.toDTO(staff);
@@ -50,7 +51,8 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     public List<StaffDto> searchManagers(String keyword){
-        List<Staff> result = managerRepo.searchManagers("%"+keyword+"%");
+        Role roleManager = roleRepo.findByName("MANAGER");
+        List<Staff> result = managerRepo.searchStaffs("%"+keyword+"%", roleManager.getRoleId());
         List<StaffDto> staffDtos = new ArrayList<>();
         for(Staff staff : result){
             StaffDto staffDto = StaffMapper.toDTO(staff);
@@ -62,7 +64,7 @@ public class ManagerServiceImpl implements ManagerService {
 
     public Staff createNew(UserDto dto, MultipartFile avatar){
         User newUser = new User();
-        Role role = roleRepo.findByName("STAFF");
+        Role role = roleRepo.findByName("MANAGER");
         newUser = UserMapper.toEntity(dto, encoder);
         newUser.setRole(role);
         newUser.setCreatedAt(new Date());
