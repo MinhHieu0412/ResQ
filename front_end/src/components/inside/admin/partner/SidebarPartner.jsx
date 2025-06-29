@@ -145,7 +145,6 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
                 }
               </span>
             </p>
-            <p className="info-partner font-roboto">Address : <br /><span className="text-black">{selectedPartner?.partnerAddress}</span></p>
             <p className="info-partner font-roboto">Phone No : <span className="text-black">{selectedPartner?.sdt}</span></p>
             <p className="info-partner font-roboto">Email : <span className="text-black">{selectedPartner?.email}</span></p>
             <p className="info-partner font-roboto">Status : <span className="text-black">{selectedPartner?.status}</span></p>

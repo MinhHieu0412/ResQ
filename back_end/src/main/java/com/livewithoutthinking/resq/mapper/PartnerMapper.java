@@ -16,13 +16,13 @@ public class PartnerMapper {
             dto.setFullName(partner.getUser().getFullName());
             dto.setEmail(partner.getUser().getEmail());
             dto.setSdt(partner.getUser().getSdt());
-            dto.setAddress(partner.getUser().getAddress());
+            dto.setLocation(partner.getUser().getAddress());
         }
 
-        dto.setResFix(partner.isResFix());
-        dto.setResTow(partner.isResTow());
-        dto.setResDrive(partner.isResDrive());
-        dto.setPartnerAddress(partner.getPartnerAddress());
+        dto.setResFix(partner.getResFix());
+        dto.setResTow(partner.getResTow());
+        dto.setResDrive(partner.getResDrive());
+        dto.setPartnerAddress(partner.getLocation());
         dto.setVerificationStatus(partner.isVerificationStatus());
         dto.setAvgTime(partner.getAvgTime());
         dto.setCreatedAt(partner.getCreatedAt());

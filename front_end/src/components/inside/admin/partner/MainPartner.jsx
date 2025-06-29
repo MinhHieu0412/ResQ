@@ -182,7 +182,6 @@ const MainPartner = () => {
         <th className="w-[14%] px-4">Username</th>
         <th className="w-[11%] px-2 whitespace-nowrap">Phone No.</th>
         <th className="w-[16%] px-4">Email</th>
-        <th className="w-[18%] px-4">Address</th>
         <th className="w-[6%] px-2 whitespace-nowrap">
           Rate
           <button onClick={() => toggleSort("rate")}>
@@ -231,7 +230,6 @@ const MainPartner = () => {
           <td>{part.fullName}</td>
           <td>{part.sdt}</td>
           <td>{part.email}</td>
-          <td>{part.address}</td>
           <td className="text-center">
             {part.avgRate ? part.avgRate.toFixed(2) : "0.0"}
           </td>

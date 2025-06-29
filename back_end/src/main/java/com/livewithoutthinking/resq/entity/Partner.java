@@ -2,8 +2,8 @@ package com.livewithoutthinking.resq.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Data
@@ -13,23 +13,23 @@ public class Partner {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PartnerID")
-    private int partnerId; 
+    private int partnerId;
 
     @OneToOne
     @JoinColumn(name = "UserID", referencedColumnName = "UserID", nullable = false)
     private User user; // Liên kết với bảng Users qua UserID
 
     @Column(name = "ResFix")
-    private boolean resFix; // Loại đối tác sửa tại chỗ
-    
-    @Column(name = "ResTow")
-    private boolean resTow; // Loại đối tác kéo xe
-    
-    @Column(name = "ResDrive")
-    private boolean resDrive; // Loại đối tác lái thay
+    private int resFix; // Loại đối tác sửa tại chỗ
 
-    @Column(name = "PartnerAddress")
-    private String partnerAddress; // Địa chỉ đối tác
+    @Column(name = "ResTow")
+    private int resTow; // Loại đối tác kéo xe
+
+    @Column(name = "ResDrive")
+    private int resDrive; // Loại đối tác lái thay
+
+    @Column(name = "Location")
+    private String location; // Địa chỉ đối tác
 
     @Column(name = "VerificationStatus")
     private boolean verificationStatus; // Trạng thái xác minh (0 hoặc 1)
@@ -45,7 +45,5 @@ public class Partner {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt; // Thời gian cập nhật đối tác
 
-    @OneToMany(mappedBy = "partner")
-    private List<Report> reports;
     // Constructor, Getters, Setters và các phương thức khác nếu cần
 }

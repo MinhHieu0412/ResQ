@@ -12,13 +12,13 @@ public class PartnerDto {
     private String fullName;
     private String email;
     private String sdt;
-    private String address;
+    private String location;
     private String partnerAddress;
     private String status;
 
-    private boolean resFix;
-    private boolean resTow;
-    private boolean resDrive;
+    private int resFix;
+    private int resTow;
+    private int resDrive;
     private boolean verificationStatus;
     private float avgTime;
     private Date createdAt;
