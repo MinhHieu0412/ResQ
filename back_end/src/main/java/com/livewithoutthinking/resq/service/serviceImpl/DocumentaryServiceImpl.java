@@ -43,7 +43,6 @@ public class DocumentaryServiceImpl implements DocumentaryService {
 
         for (Documentary unverified : unverifiedDocs) {
             String type = unverified.getDocumentType();
-
             if (documentTypeSet.contains(type)) {
                 unverified.setDocumentStatus("REJECTED");
             } else {
@@ -53,9 +52,19 @@ public class DocumentaryServiceImpl implements DocumentaryService {
             isUpdated = true;
         }
 
+        Partner partner = partnerRepo.findPartnerById(partnerId);
+        if(partner.getResFix() == 2){
+            partner.setResFix(4);
+        }
+        if(partner.getResTow() == 2){
+            partner.setResTow(4);
+        }
+        if(partner.getResDrive() == 2){
+            partner.setResDrive(4);
+        }
+        partnerRepo.save(partner);
 
         if (isUpdated) {
-            Partner partner = partnerRepo.findPartnerById(partnerId);
             Notification notification = new Notification();
             NotificationTemplate notiTemplate = notiTempRepo.findByNotiType("DOCUMENT_REJECT");
             notification.setNotificationTemplate(notiTemplate);
