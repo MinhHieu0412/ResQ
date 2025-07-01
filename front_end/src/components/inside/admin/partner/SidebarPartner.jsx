@@ -112,6 +112,7 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
   };
 
   useEffect(() => {
+    console.log(selectedPartner);
     getCheckedDocuments();
   }, [])
 
@@ -126,10 +127,12 @@ const SidebarPartner = ({ onSelect, activeKey, selectedPartner, setSelectedPartn
           </button>
         </div>
         <div className="space-y-3 px-4 items-center">
-          <img
-            src="/images/icon-web/Zero_garage.jpg"
-            alt="Garage"
-            className="rounded-lg object-cover w-full h-32"
+          <img className="rounded-lg object-cover w-full h-32"
+            alt="Avatar"
+            src={selectedPartner?.avatar ?
+              `http://localhost:9090/uploads/${selectedPartner?.avatar}` :
+              'http://localhost:9090/uploads/partner.png'
+            }
           />
           <h2 className="text-lg font-semibold text-center text-blue-900 mt-2">
             {selectedPartner?.fullName}

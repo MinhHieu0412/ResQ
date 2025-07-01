@@ -17,6 +17,7 @@ public class PartnerMapper {
             dto.setEmail(partner.getUser().getEmail());
             dto.setSdt(partner.getUser().getSdt());
             dto.setLocation(partner.getUser().getAddress());
+            dto.setAvatar(partner.getUser().getAvatar());
         }
 
         dto.setResFix(partner.getResFix());

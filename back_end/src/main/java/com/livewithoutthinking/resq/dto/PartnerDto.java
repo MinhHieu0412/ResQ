@@ -15,6 +15,7 @@ public class PartnerDto {
     private String location;
     private String partnerAddress;
     private String status;
+    private String avatar;
 
     private int resFix;
     private int resTow;

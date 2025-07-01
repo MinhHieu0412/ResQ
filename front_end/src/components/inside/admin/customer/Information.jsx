@@ -25,7 +25,12 @@ const Information = ({ customer }) => {
     <div className="flex flex-row  mx-8 mt-10">
       {/* AVATAR */}
       <div className="border border-[#68A2F0] w-[300px] h-full">
-        <img src="../../../../../public/images/icon-web/avatar.jpg" />
+        <img className="w-72" alt="Avatar"
+          src={customer.avatar ?
+            `http://localhost:9090/uploads/${customer.avatar}` :
+            'http://localhost:9090/uploads/user.png'
+          }
+        />
       </div>
       <div className="ml-16 mt-5">
         <div className="flex flex-row gap-8">
@@ -58,7 +63,7 @@ const Information = ({ customer }) => {
           <div className="flex flex-row box-dashboard">
             <div className="font-lexend mt-[1px]">
               <p className="text-xl text-center font-semibold">
-                {dashboard.totalCancel? dashboard.totalCancel : 0}
+                {dashboard.totalCancel ? dashboard.totalCancel : 0}
               </p>
               <p className="text-[15px] text-center font-medium">
                 Total Cancel
