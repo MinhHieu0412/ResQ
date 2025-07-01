@@ -118,12 +118,13 @@ class _LoginPageState extends State<LoginPage> {
               },
               child: const Text("Đăng nhập"),
             ),
+            //Setting Button for reset permission
             const SizedBox(height: 10),
             TextButton(
               onPressed: () {
                 openAppSettings();
               },
-              child: const Text("⚙️ Mở Cài đặt ứng dụng"),
+              child: const Text("Open App Setting"),
             ),
           ],
         ),
