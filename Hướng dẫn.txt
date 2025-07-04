@@ -1,5 +1,7 @@
 * Tải permission_handler
 
+* Thêm vào pubspec.yaml trên dòng permission_handler... :  device_info_plus: ^11.5.0
+
 * Test cấp quyền:
  ##Lần đầu chạy: Hủy 1 quyền > Hiện thông báo chọn mở setting hoặc tắt app > set lại quyền > vào login
  ##Lần 2 test lại: mở setting > uninstall app > chạy lại
@@ -7,3 +9,5 @@
  ***NÊN GIỮ NÚT MỞ SETTING Ở LOGIN ĐỂ MỞ XÓA APP TEST LẠI (Có thể xóa sau khi bắt đầu chạy lần cuối)
  
  Hiện tại đang hiển thị frontend là do tên project
+
+
