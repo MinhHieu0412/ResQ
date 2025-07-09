@@ -13,7 +13,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   String _permissionStatus = "🔄 Checking permission...";
-  bool _checkingPermission = true;
+  bool _checkingPermission = false;
 
   @override
   void initState() {
@@ -122,6 +122,28 @@ class _LoginPageState extends State<LoginPage> {
                         // TODO: Xử lý đăng nhập
                       },
                       child: const Text("Login"),
+                    ),
+                    //Xóa sau khi ghép
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/profile');
+                      },
+                      child: const Text("Go to Profile"),
+                    ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/personaldata');
+                      },
+                      child: const Text("Go to Personal Data"),
+                    ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/vehicle');
+                      },
+                      child: const Text("Go to vehicle"),
                     ),
                     //Có thể bỏ sau khi test xong
                     const SizedBox(height: 10),
