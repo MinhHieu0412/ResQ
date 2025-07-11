@@ -18,6 +18,9 @@ public class Vehicle {
     @JoinColumn(name = "UserID", referencedColumnName = "UserID")
     private User user; // Liên kết với bảng Users qua UserID
 
+    @Column(name = "PlateNo")
+    private String plateNo; // Biển số xe
+
     @Column(name = "Brand")
     private String brand; // Hãng xe
 

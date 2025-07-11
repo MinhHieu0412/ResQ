@@ -27,17 +27,17 @@ public class VehicleService {
     }
 
     // === CREATE ===
-    public Vehicle addVehicle(int userId, String brand, String model, int year, String vehicleStatus,
+    public Vehicle addVehicle(int userId, String brand, String model, String plateNo, int year, String vehicleStatus,
                               MultipartFile frontImage, MultipartFile backImage,
                               MultipartFile imgTem, MultipartFile imgTool, MultipartFile imgDevice) throws Exception {
 
         Vehicle v = new Vehicle();
-
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         v.setUser(user);
 
         v.setBrand(encryptSafe(brand));
         v.setModel(encryptSafe(model));
+        v.setPlateNo(encryptSafe(plateNo));
         v.setYear(year);
         v.setVehicleStatus(vehicleStatus);
         v.setCreatedAt(new Timestamp(System.currentTimeMillis()));
@@ -50,6 +50,47 @@ public class VehicleService {
         v.setImgDevice(uploadService.saveEncryptedFile(imgDevice));
 
         return vehicleRepository.save(v);
+    }
+
+    // === CREATE CUSTOMER ===
+    public Vehicle addCustomerVehicle(VehicleDto vehicleDto, MultipartFile frontImage, MultipartFile backImage) throws Exception {
+        Vehicle v = new Vehicle();
+        User user = userRepository.findById(vehicleDto.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
+        v.setUser(user);
+        v.setPlateNo(encryptSafe(vehicleDto.getPlateNo()));
+        v.setBrand(encryptSafe(vehicleDto.getBrand()));
+        v.setModel(encryptSafe(vehicleDto.getModel()));
+        v.setYear(vehicleDto.getYear());
+        v.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        v.setFrontImage(uploadService.saveEncryptedFile(frontImage));
+        v.setBackImage(uploadService.saveEncryptedFile(backImage));
+        v.setDocumentStatus("PENDING");
+        vehicleRepository.save(v);
+        return v;
+    }
+
+    // === UPDATE CUSTOMER ===
+    public Vehicle updateCustomerVehicle(VehicleDto vehicleDto, MultipartFile frontImage, MultipartFile backImage) throws Exception
+    {
+        Vehicle v = vehicleRepository.findById(vehicleDto.getVehicleId()).orElseThrow(() -> new RuntimeException("Vehicle not found"));
+        User user = userRepository.findById(vehicleDto.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
+        if(v != null){
+            v.setUser(user);
+            v.setPlateNo(encryptSafe(vehicleDto.getPlateNo()));
+            v.setBrand(encryptSafe(vehicleDto.getBrand()));
+            v.setModel(encryptSafe(vehicleDto.getModel()));
+            v.setYear(vehicleDto.getYear());
+            v.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            if(frontImage != null){
+                v.setFrontImage(uploadService.saveEncryptedFile(frontImage));
+            }
+            if(backImage != null){
+                v.setBackImage(uploadService.saveEncryptedFile(backImage));
+            }
+            v.setDocumentStatus("PENDING");
+        }
+        vehicleRepository.save(v);
+        return v;
     }
 
     // === READ ALL ===
@@ -95,6 +136,7 @@ public class VehicleService {
 
         dto.setBrand(decryptSafe(v.getBrand()));
         dto.setModel(decryptSafe(v.getModel()));
+        dto.setPlateNo(decryptSafe(v.getPlateNo()));
 
         dto.setFrontImage(buildImageUrl(v.getFrontImage()));
         dto.setBackImage(buildImageUrl(v.getBackImage()));

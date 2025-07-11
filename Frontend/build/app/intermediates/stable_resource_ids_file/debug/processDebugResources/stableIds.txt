@@ -1,3 +1,4 @@
+com.example.frontend:xml/flutter_image_picker_file_paths = 0x7f0e0000
 com.example.frontend:styleable/SplitPairRule = 0x7f0d000b
 com.example.frontend:styleable/GradientColorItem = 0x7f0d0009
 com.example.frontend:styleable/GradientColor = 0x7f0d0008
