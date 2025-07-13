@@ -136,7 +136,7 @@ class ApiService {
     File? frontImage,
     File? backImage,
   }) async {
-    final uri = Uri.parse('$baseUrl/vehicles/$vehicleId');
+    final uri = Uri.parse('$baseUrl/vehicles/updateVehicle/$vehicleId');
 
     // Tạo MultipartRequest với method PUT
     final request = http.MultipartRequest('PUT', uri);
@@ -196,8 +196,134 @@ class ApiService {
 
   ///Personal Data///
   // Get Personal Data
+  static Future<List<dynamic>> getCustomerPersonalData(int customerId) async {
+    final url = Uri.parse('$baseUrl/personaldata/$customerId');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Accept': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+        print(decoded);
+        if (decoded is List) {
+          return decoded;
+        } else {
+          throw Exception('Expected List but got ${decoded.runtimeType}');
+        }
+      } else {
+        throw Exception('Server error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Connection error: $e');
+    }
+  }
 
   // Create New Personal Data
+  static Future<Map<String, dynamic>> createPersonalData({
+    required int customerId,
+    required Map<String, dynamic> personalDataDto,
+    required File? frontImage,
+    required File? backImage,
+    required File? faceImage,
+  }) async {
+    final uri = Uri.parse('$baseUrl/personaldata/createNew');
+
+    try{
+      final personalDataDtoString = jsonEncode(personalDataDto);
+      final request =
+      http.MultipartRequest('POST', uri)
+        ..fields['personalDataString'] = personalDataDtoString
+        ..fields['userId'] = customerId.toString()
+        ..headers['Content-Type'] = 'multipart/form-data';
+
+      if (frontImage != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('frontImage', frontImage.path),
+        );
+      }
+      if (backImage != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('backImage', backImage.path),
+        );
+      }
+      if (faceImage != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('faceImage', faceImage.path),
+        );
+      }
+      final response = await request.send();
+      final respStr = await response.stream.bytesToString();
+      Map<String, dynamic> parsedBody = {};
+      try {
+        parsedBody = jsonDecode(respStr);
+      } catch (_) {
+        // Nếu không decode được thì để parsedBody rỗng
+      }
+      return {
+        "status": response.statusCode,
+        "success": response.statusCode == 200,
+        "body": respStr,
+        "errors": parsedBody["errors"] is Map ? parsedBody["errors"] : {},
+
+      };
+    }catch(e) {
+      throw Exception('Connection error: $e');
+    }
+  }
 
   // Update Personal Data
+  static Future<Map<String, dynamic>> updatePersonalData({
+    required int pdId,
+    required Map<String, dynamic> personalDataDto,
+    required File? frontImage,
+    required File? backImage,
+    required File? faceImage,
+  }) async {
+    final uri = Uri.parse('$baseUrl/personaldata/updatePd/${pdId}');
+
+    try{
+      final personalDataDtoString = jsonEncode(personalDataDto);
+      final request =
+      http.MultipartRequest('PUT', uri)
+        ..fields['pdId'] = pdId.toString()
+        ..fields['personalDataDtoString'] = personalDataDtoString
+        ..headers['Accept'] = 'application/json';
+
+      if (frontImage != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('frontImage', frontImage.path),
+        );
+      }
+      if (backImage != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('backImage', backImage.path),
+        );
+      }
+      if (faceImage != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('faceImage', faceImage.path),
+        );
+      }
+      final response = await request.send();
+      print(response);
+      final respStr = await response.stream.bytesToString();
+      print(respStr);
+      Map<String, dynamic> parsedBody = {};
+      try {
+        parsedBody = jsonDecode(respStr);
+      } catch (_) {
+        // Nếu không decode được thì để parsedBody rỗng
+      }
+      return {
+        "status": response.statusCode,
+        "success": response.statusCode == 200,
+        "body": respStr,
+        "errors": parsedBody["errors"] is Map ? parsedBody["errors"] : {},
+
+      };
+    }catch(e) {
+      throw Exception('Connection error: $e');
+    }
+  }
 }

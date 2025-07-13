@@ -43,5 +43,8 @@ public class PersonalData {
     @Column(name = "FaceImage")
     private String faceImage;// FaceImage là VARCHAR(255)
 
+    @ManyToOne
+    @JoinColumn(name = "UserID")
+    private User user;
     // Constructor, Getters, Setters and other methods if needed
 }

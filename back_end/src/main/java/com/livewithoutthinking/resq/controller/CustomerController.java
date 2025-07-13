@@ -2,10 +2,15 @@ package com.livewithoutthinking.resq.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.livewithoutthinking.resq.dto.DocumentaryDto;
+import com.livewithoutthinking.resq.dto.PersonalDataDto;
 import com.livewithoutthinking.resq.dto.UserDto;
 import com.livewithoutthinking.resq.dto.VehicleDto;
 import com.livewithoutthinking.resq.helpers.ApiResponse;
+import com.livewithoutthinking.resq.repository.DocumentaryRepository;
 import com.livewithoutthinking.resq.service.CustomerService;
+import com.livewithoutthinking.resq.service.DocumentaryService;
+import com.livewithoutthinking.resq.service.PersonalDataService;
 import com.livewithoutthinking.resq.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -20,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -30,24 +36,30 @@ public class CustomerController {
     private CustomerService customerService;
     @Autowired
     private VehicleService vehicleService;
+    @Autowired
+    private PersonalDataService personalDataService;
+    @Autowired
+    private DocumentaryRepository documentaryRepository;
+    @Autowired
+    private DocumentaryService documentaryService;
 
     // Profile
     @GetMapping("/{customerId}")
-    public ResponseEntity<?> getCustomer(@PathVariable("customerId") int customerId){
-        try{
+    public ResponseEntity<?> getCustomer(@PathVariable("customerId") int customerId) {
+        try {
             return ok(customerService.getCustomer(customerId));
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @PutMapping("/updateCustomer/{customerId}")
     public ResponseEntity<?> updateCustomer(@PathVariable("customerId") int customerId,
-                                            @RequestBody String userDtoString){
-        try{
+                                            @RequestBody String userDtoString) {
+        try {
             ObjectMapper mapper = new ObjectMapper();
             UserDto dto = mapper.readValue(userDtoString, UserDto.class);
-            if(dto.getUserId() == 0 ){
+            if (dto.getUserId() == 0) {
                 dto.setUserId(customerId);
             }
             return ok(customerService.updateCustomer(dto));
@@ -60,10 +72,10 @@ public class CustomerController {
 
     // Vehicle
     @GetMapping("/vehicles/{customerId}")
-    public ResponseEntity<?> getVehicles(@PathVariable("customerId") int customerId){
-        try{
+    public ResponseEntity<?> getVehicles(@PathVariable("customerId") int customerId) {
+        try {
             return ok(vehicleService.getByUserId(customerId));
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -94,20 +106,22 @@ public class CustomerController {
         }
     }
 
-    @PutMapping("/vehicles/{vehicleId}")
+    @PutMapping("/vehicles/updateVehicle/{vehicleId}")
     public ResponseEntity<?> getVehicle(@PathVariable("vehicleId") int vehicleId,
                                         @RequestPart("vehicleDtoString") String vehicleDtoString,
                                         @RequestPart(value = "frontImage", required = false) MultipartFile frontImage,
-                                        @RequestPart(value = "backImage", required = false) MultipartFile backImage){
+                                        @RequestPart(value = "backImage", required = false) MultipartFile backImage) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             VehicleDto vehicleDto = mapper.readValue(vehicleDtoString, VehicleDto.class);
-            System.out.println(vehicleDto);
+
+            if(vehicleDto.getVehicleId() != vehicleId || vehicleDto.getVehicleId() == 0) {
+                vehicleDto.setVehicleId(vehicleId);
+            }
             Map<String, String> errors = validateVehicle(vehicleDto);
             if (!errors.isEmpty()) {
                 return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
             }
-            System.out.println(vehicleDto);
             return ResponseEntity.ok(vehicleService.updateCustomerVehicle(vehicleDto, frontImage, backImage));
         } catch (Exception e) {
             return ResponseEntity
@@ -115,7 +129,138 @@ public class CustomerController {
         }
     }
 
-    @GetMapping("/vehicles/image")
+
+    // Personal Data
+    @GetMapping("/personaldata/{customerId}")
+    public ResponseEntity<?> getPeronalData(@PathVariable("customerId") int customerId) {
+        try {
+            return ok(personalDataService.getPersonalDataByUserId(customerId));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/personaldata/createNew")
+    public ResponseEntity<?> createNewPeronalData(
+            @RequestPart("personalDataString") String personalDataString,
+            @RequestPart("userId") String userId,
+            @RequestPart(value = "frontImage", required = false) MultipartFile frontImage,
+            @RequestPart(value = "backImage", required = false) MultipartFile backImage,
+            @RequestPart(value = "faceImage", required = false) MultipartFile faceImage) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            PersonalDataDto personalDataDto = mapper.readValue(personalDataString, PersonalDataDto.class);
+            System.out.println(frontImage);
+            System.out.println(faceImage);
+            Map<String, String> errors = validatePersonalData(personalDataDto);
+            if (frontImage == null || frontImage.isEmpty()) {
+                errors.put("frontImage", "Front image is required");
+            }
+            if (backImage == null || backImage.isEmpty()) {
+                errors.put("backImage", "Back image is required");
+            }
+            if (faceImage == null || faceImage.isEmpty()) {
+                errors.put("faceImage", "Face image is required");
+            }
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
+            }
+            return ResponseEntity.ok(personalDataService.addPersonalData(personalDataDto, Integer.parseInt(userId), frontImage, backImage, faceImage));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest().body("Error parsing vehicleDtoString: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/personaldata/updatePd/{pdId}")
+    public ResponseEntity<?> updatePersonalData(@PathVariable("pdId") String pdId,
+                                             @RequestPart("personalDataDtoString") String personalDataDtoString,
+                                             @RequestPart(value = "frontImage", required = false) MultipartFile frontImage,
+                                             @RequestPart(value = "backImage", required = false) MultipartFile backImage,
+                                             @RequestPart(value = "faceImage", required = false) MultipartFile faceImage) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            PersonalDataDto personalDataDto = mapper.readValue(personalDataDtoString, PersonalDataDto.class);
+            Integer personalDataId = Integer.parseInt(pdId);
+            if(personalDataDto.getPdId() != personalDataId || personalDataDto.getPdId() == 0) {
+                personalDataDto.setPdId(personalDataId);
+            }
+            System.out.println(personalDataDto);
+            Map<String, String> errors = validatePersonalData(personalDataDto);
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
+            }
+            return ResponseEntity.ok(personalDataService.updatePersonalData(personalDataDto, frontImage, backImage, faceImage));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest().body("Error parsing vehicleDtoString: " + e.getMessage());
+        }
+    }
+
+    //Documents
+    @GetMapping("/documents/{customerId}")
+    public ResponseEntity<?> getDocument(@PathVariable("customerId") int customerId) {
+        try {
+            return ok(documentaryRepository.findByUser_UserId(customerId));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping("/documents/createNew")
+    public ResponseEntity<?> createNewDocument(
+            @RequestPart("documentString") String documentString,
+            @RequestPart("userId") int userId,
+            @RequestPart(value = "frontImage", required = false) MultipartFile frontImage,
+            @RequestPart(value = "backImage", required = false) MultipartFile backImage) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            DocumentaryDto documentaryDto = mapper.readValue(documentString, DocumentaryDto.class);
+
+            Map<String, String> errors = validateDocument(documentaryDto);
+            if (frontImage == null || frontImage.isEmpty()) {
+                errors.put("frontImage", "Front image is required");
+            }
+            if (backImage == null || backImage.isEmpty()) {
+                errors.put("backImage", "Back image is required");
+            }
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
+            }
+            return ResponseEntity.ok(documentaryService.addCusDoc(documentaryDto, userId, frontImage, backImage));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest().body("Error parsing vehicleDtoString: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/documents/updateDoc/{documentId}")
+    public ResponseEntity<?> getDocument(@PathVariable("documentId") int documentId,
+                                         @RequestPart("documentDtoString") String documentDtoString,
+                                         @RequestPart(value = "frontImage", required = false) MultipartFile frontImage,
+                                         @RequestPart(value = "backImage", required = false) MultipartFile backImage) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            DocumentaryDto documentDto = mapper.readValue(documentDtoString, DocumentaryDto.class);
+            Map<String, String> errors = validateDocument(documentDto);
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
+            }
+            System.out.println(documentDto);
+            return ResponseEntity.ok(documentaryService.updateCusDoc(documentDto, frontImage, backImage));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest().body("Error parsing vehicleDtoString: " + e.getMessage());
+        }
+    }
+
+
+    //Support
+    private <T> ResponseEntity<T> ok(T body) {
+        return ResponseEntity.ok(body);
+    }
+
+    @GetMapping("/image")
     public ResponseEntity<Resource> getImage(@RequestParam String path) throws IOException {
         Path imagePath = Paths.get(path);
         if (!Files.exists(imagePath)) {
@@ -130,30 +275,57 @@ public class CustomerController {
                 .body(resource);
     }
 
-    //Support
-    private <T> ResponseEntity<T> ok(T body) {
-        return ResponseEntity.ok(body);
-    }
-
     //Validate
     private Map<String, String> validateVehicle(VehicleDto dto) {
         Map<String, String> errors = new LinkedHashMap<>();
         String plateNoPattern = "^[0-9]{2}[A-Z]{1,2}-[0-9]{4,5}$";
-        if(dto.getPlateNo() == null || dto.getPlateNo().isEmpty()){
+        if (dto.getPlateNo() == null || dto.getPlateNo().isEmpty()) {
             errors.put("plateNo", "Plate no is required");
-        }else if (!dto.getPlateNo().matches(plateNoPattern)) {
+        } else if (!dto.getPlateNo().matches(plateNoPattern)) {
             errors.put("plateNo", "Invalid plate no format");
         }
-        if(dto.getBrand() == null || dto.getBrand().isEmpty()){
+        if (dto.getBrand() == null || dto.getBrand().isEmpty()) {
             errors.put("brand", "Brand is required");
         }
-        if(dto.getModel() == null || dto.getModel().isEmpty()){
+        if (dto.getModel() == null || dto.getModel().isEmpty()) {
             errors.put("model", "Model is required");
         }
         int currentYear = LocalDate.now().getYear();
-        if(dto.getYear() < 1900 || dto.getYear() > currentYear){
-            errors.put("year", "Year must be between 1900 and "+currentYear);
+        if (dto.getYear() < 1900 || dto.getYear() > currentYear) {
+            errors.put("year", "Year must be between 1900 and " + currentYear);
         }
+        return errors;
+    }
+
+    private Map<String, String> validatePersonalData(PersonalDataDto dto) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        if (dto.getCitizenNumber() == null || dto.getCitizenNumber().isEmpty()) {
+            errors.put("citizenNumber", "Citizen number is required");
+        } else if ("Identity Card".equals(dto.getType())) {
+            String citizenNumber = dto.getCitizenNumber();
+            if (citizenNumber.length() < 9 || citizenNumber.length() > 12 || !citizenNumber.matches("\\d+")) {
+                errors.put("citizenNumber", "Citizen number must be 9-12 digits and contain only numbers for Identity Card");
+            }
+        }
+        if (dto.getIssuePlace() == null || dto.getIssuePlace().isEmpty()) {
+            errors.put("issuePlace", "Issue place is required");
+        }
+        if (dto.getIssueDate() == null) {
+            errors.put("issueDate", "Issue date is required");
+        } else if (dto.getIssueDate().after(new Date())) {
+            errors.put("issueDate", "Issue date must not be after today");
+        }
+        if (dto.getExpirationDate() == null) {
+            errors.put("expirationDate", "Expiration date is required");
+        } else if (!dto.getExpirationDate().after(dto.getIssueDate())) {
+            errors.put("expirationDate", "Expiration date must be after issued date");
+        }
+
+        return errors;
+    }
+
+    private Map<String, String> validateDocument(DocumentaryDto dto) {
+        Map<String, String> errors = new LinkedHashMap<>();
         return errors;
     }
 

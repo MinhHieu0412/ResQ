@@ -5,7 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class NewVehiclePage extends StatefulWidget {
-  const NewVehiclePage({super.key});
+  final int customerId;
+  const NewVehiclePage({super.key, required this.customerId});
 
   @override
   State<NewVehiclePage> createState() => _NewVehiclePageState();
@@ -76,10 +77,8 @@ class _NewVehiclePageState extends State<NewVehiclePage> {
     final model = modelController.text.trim();
     final year = int.tryParse(yearController.text.trim());
 
-    const int customerId = 150;
-
     final result = await ApiService.createVehicle(
-      customerId: customerId,
+      customerId: widget.customerId,
       plateNo: plate,
       brand: brand,
       model: model,

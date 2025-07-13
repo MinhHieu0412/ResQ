@@ -1,45 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/services/api.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../../services/api.dart';
 
-class VehicleDetailPage extends StatefulWidget {
-  final Map<String, dynamic> vehicle;
+import 'package:intl/intl.dart';
 
-  const VehicleDetailPage({super.key, required this.vehicle});
+class PersonalDataDetailPage extends StatefulWidget {
+  final int customerId;
+  final Map<String, dynamic> personalData;
+
+  const PersonalDataDetailPage({
+    super.key,
+    required this.customerId,
+    required this.personalData,
+  });
 
   @override
-  State<VehicleDetailPage> createState() => _VehicleDetailPageState();
+  State<PersonalDataDetailPage> createState() => _PersonalDataDetailPageState();
 }
 
-class _VehicleDetailPageState extends State<VehicleDetailPage> {
+class _PersonalDataDetailPageState extends State<PersonalDataDetailPage> {
   bool isEditing = false;
   bool hasUpdated = false;
-  late TextEditingController plateController;
-  late TextEditingController brandController;
-  late TextEditingController modelController;
-  late TextEditingController yearController;
+  late TextEditingController typeController;
+  late TextEditingController citizenNoController;
+  late TextEditingController issuedPlaceController;
+  late TextEditingController issuedDateController;
+  late TextEditingController expirationDateController;
 
   File? _frontImageFile;
   File? _backImageFile;
+  File? _faceImageFile;
   final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    final v = widget.vehicle;
-    plateController = TextEditingController(text: v['plateNo'] ?? '');
-    brandController = TextEditingController(text: v['brand'] ?? '');
-    modelController = TextEditingController(text: v['model'] ?? '');
-    yearController = TextEditingController(text: v['year']?.toString() ?? '');
+    final pd = widget.personalData;
+    typeController = TextEditingController(text: pd['type'] ?? '');
+    citizenNoController = TextEditingController(text: pd['citizenNumber'] ?? '');
+    issuedPlaceController = TextEditingController(text: pd['issuePlace'] ?? '');
+    issuedDateController = TextEditingController(text: pd['issueDate'] ?? '');
+    expirationDateController = TextEditingController(text: pd['expirationDate']?.toString() ?? '');
   }
 
   @override
   void dispose() {
-    plateController.dispose();
-    brandController.dispose();
-    modelController.dispose();
-    yearController.dispose();
+    typeController.dispose();
+    citizenNoController.dispose();
+    issuedPlaceController.dispose();
+    issuedDateController.dispose();
+    expirationDateController.dispose();
     super.dispose();
   }
 
@@ -80,40 +91,51 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
       setState(() {
         if (index == 1) {
           _frontImageFile = File(pickedFile.path);
-        } else {
+        } else if (index == 2) {
           _backImageFile = File(pickedFile.path);
+        } else {
+          _faceImageFile = File(pickedFile.path);
         }
       });
     }
   }
 
+
   Future<void> _handleUpdate() async {
-    final plate = plateController.text.trim();
-    final brand = brandController.text.trim();
-    final model = modelController.text.trim();
-    final year = int.tryParse(yearController.text.trim()) ?? 0;
-    final int vehicleId = int.tryParse(widget.vehicle['vehicleId'].toString()) ?? 0;
-    final int userId = int.tryParse(widget.vehicle['userId'].toString()) ?? 0;
+    final customerId = widget.customerId;
+    final type = typeController.text.trim();
+    final citizenNo = citizenNoController.text.trim();
+    final issuedPlace = issuedPlaceController.text.trim();
+    final issuedDate = issuedDateController.text.trim();
+    final expirationDate = expirationDateController.text.trim();
 
+    final dto = {
+      "type": type,
+      "citizenNumber": citizenNo,
+      "issuePlace": issuedPlace,
+      "issueDate": issuedDate,
+      "expirationDate": expirationDate,
+    };
 
-    final result = await ApiService.updateVehicle(
-      vehicleId: vehicleId,
-      userId: userId,
-      plateNo: plate,
-      brand: brand,
-      model: model,
-      year: year,
+    final result = await ApiService.updatePersonalData(
+      pdId: widget.personalData['pdId'],
+      personalDataDto: dto,
       frontImage: _frontImageFile,
       backImage: _backImageFile,
+      faceImage: _faceImageFile,
     );
 
+    setState(() {
+      isEditing = false;
+      hasUpdated = true;
+    });
     if (!mounted) return;
     if (result['success'] == true) {
       setState(() {
         isEditing = false;
         hasUpdated = true;
       });
-      _showDialog("Update Success", "Your vehicle is updated!");
+      _showDialog("Update Success", "Your personal data is updated!");
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: ${result['errors']}")),
@@ -123,25 +145,28 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final v = widget.vehicle;
+    final v = widget.personalData;
     final String baseUrl = 'http://192.168.1.100:9090/api/resq/customer';
 
     String stripAdminPrefix(String url) {
       final uriParts = url.split('?');
-      final path = uriParts[0].replaceFirst('/admin/vehicle', '');
+      final path = uriParts[0].replaceFirst('/admin/personaldoc', '');
       final query = uriParts.length > 1 ? '?${uriParts[1]}' : '';
       return '$path$query';
     }
 
-    final String? frontImagePath = v['frontImage'];
-    final String? backImagePath = v['backImage'];
+    final String? frontImagePath = v['frontImageUrl'];
+    final String? backImagePath = v['backImageUrl'];
+    final String? faceImagePath = v['faceImageUrl'];
 
     final String? frontImageUrl = frontImagePath != null
         ? '$baseUrl${stripAdminPrefix(frontImagePath)}'
         : null;
-
     final String? backImageUrl = backImagePath != null
         ? '$baseUrl${stripAdminPrefix(backImagePath)}'
+        : null;
+    final String? faceImageUrl = faceImagePath != null
+        ? '$baseUrl${stripAdminPrefix(faceImagePath)}'
         : null;
 
     return Scaffold(
@@ -149,7 +174,7 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
       appBar: AppBar(
         backgroundColor: Colors.blue[900],
         centerTitle: true,
-        title: const Text("Vehicle Detail", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text("Personal Document", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: () => Navigator.pop(context, hasUpdated),
@@ -160,25 +185,31 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildField("Plate No:", plateController, enabled: isEditing),
-            _buildField("Brand:", brandController, enabled: isEditing),
-            _buildField("Model:", modelController, enabled: isEditing),
-            _buildField("Year:", yearController, enabled: isEditing, keyboardType: TextInputType.number),
+            _buildField("Document Type:", typeController, enabled: false),
+            _buildField("Citizen Number:", citizenNoController, enabled: isEditing),
+            _buildField("Issued Place:", issuedPlaceController, enabled: isEditing),
+            _buildField("Issued Date:", issuedDateController, enabled: isEditing, isDate: true),
+            _buildField("Expiration Date:", expirationDateController, enabled: isEditing, isDate: true),
             const SizedBox(height: 30),
-            const Text("Vehicle Image:", style: _labelStyle),
+            const Text("Document Images:", style: _labelStyle),
             const SizedBox(height: 10),
             Row(
               children: [
-                Expanded(
-                  child: _buildImagePicker(1, _frontImageFile, frontImageUrl, "Front Image"),
-                ),
+                Expanded(child: _buildImagePicker(1, _frontImageFile, frontImageUrl, "Front Image")),
                 const SizedBox(width: 16),
-                Expanded(
-                  child: _buildImagePicker(2, _backImageFile, backImageUrl, "Back Image"),
-                ),
+                Expanded(child: _buildImagePicker(2, _backImageFile, backImageUrl, "Back Image")),
               ],
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
+            const Text("Face Photo:", style: _labelStyle),
+            const SizedBox(height: 10),
+            //_buildImagePicker(3, _faceImageFile, faceImageUrl, "Face Image"),
+            SizedBox(
+              height: 112.5, // hoặc kích thước tùy ý
+              width: 180,
+              child: _buildImagePicker(3, _faceImageFile, faceImageUrl, "Face Image"),
+            ),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -208,38 +239,10 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
     );
   }
 
-  void _showDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder:
-          (_) => AlertDialog(
-        title: Center(
-          child: Text(
-            title,
-            style: TextStyle(
-              fontFamily: 'Raleway',
-              fontSize: 23,
-              color: Colors.green[900],
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        content: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: TextStyle(fontFamily: 'Lexend', fontSize: 17),
-        ),
-      ),
-    );
-
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
-    });
-  }
-
-  Widget _buildField(String label, TextEditingController controller, {bool enabled = false, TextInputType? keyboardType}) {
+  Widget _buildField(String label, TextEditingController controller, {
+    bool enabled = false,
+    bool isDate = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
@@ -249,14 +252,28 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
           const SizedBox(height: 6),
           TextField(
             controller: controller,
+            readOnly: isDate,
             enabled: enabled,
-            keyboardType: keyboardType,
+            onTap: enabled && isDate
+                ? () async {
+              final DateTime? picked = await showDatePicker(
+                context: context,
+                initialDate: DateTime.tryParse(controller.text) ?? DateTime.now(),
+                firstDate: DateTime(1900),
+                lastDate: DateTime(2100),
+              );
+              if (picked != null) {
+                controller.text = picked.toIso8601String().split('T')[0]; // yyyy-MM-dd
+              }
+            }
+                : null,
             style: TextStyle(color: !enabled ? Colors.grey[700] : Colors.black),
             decoration: InputDecoration(
               filled: !enabled,
               fillColor: enabled ? null : Colors.grey.shade100,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              suffixIcon: isDate && enabled ? const Icon(Icons.calendar_today, size: 20) : null,
             ),
           ),
         ],
@@ -285,6 +302,36 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
         ),
       ),
     );
+  }
+
+  void _showDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Center(
+          child: Text(
+            title,
+            style: TextStyle(
+              fontFamily: 'Raleway',
+              fontSize: 23,
+              color: Colors.green[900],
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        content: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontFamily: 'Lexend', fontSize: 17),
+        ),
+      ),
+    );
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    });
   }
 
   static const TextStyle _labelStyle = TextStyle(

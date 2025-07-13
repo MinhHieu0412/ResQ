@@ -134,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/personaldata');
+                        Navigator.pushNamed(context, '/personalData');
                       },
                       child: const Text("Go to Personal Data"),
                     ),

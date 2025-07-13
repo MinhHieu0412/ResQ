@@ -81,10 +81,10 @@ public class VehicleService {
             v.setModel(encryptSafe(vehicleDto.getModel()));
             v.setYear(vehicleDto.getYear());
             v.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-            if(frontImage != null){
+            if(frontImage != null && !frontImage.isEmpty()){
                 v.setFrontImage(uploadService.saveEncryptedFile(frontImage));
             }
-            if(backImage != null){
+            if(backImage != null && !backImage.isEmpty()){
                 v.setBackImage(uploadService.saveEncryptedFile(backImage));
             }
             v.setDocumentStatus("PENDING");
