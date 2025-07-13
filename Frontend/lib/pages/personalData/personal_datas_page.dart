@@ -155,46 +155,6 @@ class _PersonalDatasPageState extends State<PersonalDatasPage> {
                               ),
                     ),
                     const SizedBox(height: 20),
-                    // TextButton.icon(
-                    //   onPressed: () async {
-                    //     final result = await Navigator.pushNamed(
-                    //       context,
-                    //       '/newPersonalData',
-                    //       arguments: {
-                    //         'customerId': widget.customerId,
-                    //         'availableTypes': _getAvailableTypes(),
-                    //       },
-                    //     );
-                    //     if (result == true) {
-                    //       await fetchPersonalDatas(); // Cập nhật lại danh sách
-                    //     }
-                    //   },
-                    //   icon: Container(
-                    //     decoration: const BoxDecoration(shape: BoxShape.circle),
-                    //     padding: const EdgeInsets.all(4),
-                    //     child: Image.asset(
-                    //       'assets/icons/plus_red.png',
-                    //       width: 22,
-                    //       height: 20,
-                    //       fit: BoxFit.contain,
-                    //     ),
-                    //   ),
-                    //   label: Text(
-                    //     "Add New Personal Document",
-                    //     style: TextStyle(
-                    //       color: Colors.red[900],
-                    //       fontWeight: FontWeight.bold,
-                    //       fontSize: 18,
-                    //     ),
-                    //   ),
-                    //   style: TextButton.styleFrom(
-                    //     foregroundColor: Colors.blue[900],
-                    //     padding: const EdgeInsets.symmetric(
-                    //       horizontal: 8,
-                    //       vertical: 4,
-                    //     ),
-                    //   ),
-                    // ),
                     if ((personalDatas?.length ?? 0) < 2)
                       TextButton.icon(
                         onPressed: () async {
