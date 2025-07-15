@@ -41,7 +41,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.blue[900],
+        backgroundColor: Color(0xFF013171),
         title: const Text(
           "Vehicles",
           style: TextStyle(
@@ -163,7 +163,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                         ),
                       ),
                       style: TextButton.styleFrom(
-                        foregroundColor: Colors.blue[900],
+                        foregroundColor: Color(0xFF013171),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 4,

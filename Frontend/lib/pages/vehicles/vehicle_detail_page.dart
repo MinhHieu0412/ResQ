@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../services/api.dart';
+import 'package:frontend/config/constansts.dart';
 
 class VehicleDetailPage extends StatefulWidget {
   final Map<String, dynamic> vehicle;
@@ -124,7 +125,6 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
   @override
   Widget build(BuildContext context) {
     final v = widget.vehicle;
-    final String baseUrl = 'http://192.168.1.100:9090/api/resq/customer';
 
     String stripAdminPrefix(String url) {
       final uriParts = url.split('?');
@@ -147,7 +147,7 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.blue[900],
+        backgroundColor: Color(0xFF013171),
         centerTitle: true,
         title: const Text("Vehicle Detail", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
         leading: IconButton(
@@ -190,7 +190,7 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
                       setState(() => isEditing = true);
                     }
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[900]),
+                  style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF013171)),
                   child: Text(isEditing ? "Save" : "Edit", style: const TextStyle(color: Colors.white)),
                 ),
                 const SizedBox(width: 16),
@@ -271,7 +271,7 @@ class _VehicleDetailPageState extends State<VehicleDetailPage> {
         aspectRatio: 1.6,
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.blue[900]!),
+            border: Border.all(color: Color(0xFF013171)!),
             borderRadius: BorderRadius.circular(8),
           ),
           child: ClipRRect(

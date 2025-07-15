@@ -172,7 +172,7 @@ class _NewVehiclePageState extends State<NewVehiclePage> {
         aspectRatio: 1.6,
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.blue[900]!),
+            border: Border.all(color: Color(0xFF013171)!),
             borderRadius: BorderRadius.circular(8),
           ),
           child:
@@ -184,7 +184,7 @@ class _NewVehiclePageState extends State<NewVehiclePage> {
                   : Center(
                     child: Icon(
                       Icons.add_circle_outline,
-                      color: Colors.blue[900],
+                      color: Color(0xFF013171),
                       size: 40,
                     ),
                   ),
