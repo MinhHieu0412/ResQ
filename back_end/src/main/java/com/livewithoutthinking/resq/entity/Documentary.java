@@ -18,7 +18,11 @@ public class Documentary {
 
     @ManyToOne
     @JoinColumn(name = "PartnerID", referencedColumnName = "PartnerID")
-    private Partner partnerId; // Liên kết với bảng Partner qua PartnerID
+    private Partner partner; // Liên kết với bảng Partner qua PartnerID
+
+    @ManyToOne
+    @JoinColumn(name = "UserId", referencedColumnName = "UserID", nullable = true)
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "VehicleID", referencedColumnName = "VehicleID")
@@ -30,8 +34,11 @@ public class Documentary {
     @Column(name = "DocumentNumber")
     private String documentNumber; // Số giấy tờ (ví dụ: Số giấy đăng ký xe)
 
-    @Column(name = "DocumentImage")
-    private String documentImage; // Đường dẫn hoặc URL tới hình ảnh giấy tờ
+    @Column(name = "FrontImage", nullable = true)
+    private String frontImage;
+
+    @Column(name = "BackImage", nullable = true)
+    private String backImage;
 
     @Column(name = "DocumentStatus")
     private String documentStatus;
@@ -46,6 +53,9 @@ public class Documentary {
     @Column(name = "Updated_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt; // Thời gian cập nhật
+
+    @Column(name = "ResType")
+    private String resType;
 
     // Constructor, Getters, Setters và các phương thức khác nếu cần
 }
