@@ -5,6 +5,7 @@ import com.livewithoutthinking.resq.entity.*;
 import com.livewithoutthinking.resq.mapper.UserMapper;
 import com.livewithoutthinking.resq.repository.UserRepository;
 import com.livewithoutthinking.resq.service.CustomerService;
+import com.livewithoutthinking.resq.service.UploadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private UserRepository customerRepository;
+    @Autowired
+    private UploadService uploadService;
 
     public UserDto getCustomer(int customerId){
         User user = customerRepository.findById(customerId)
@@ -27,6 +30,12 @@ public class CustomerServiceImpl implements CustomerService {
     public UserDto updateCustomer(UserDto dto){
         User user = customerRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        if(dto.getUsername() != null || dto.getUsername().isEmpty()){
+            user.setUsername(dto.getUsername());
+        }
+        if(dto.getEmail() != null && !dto.getEmail().isEmpty()){
+            user.setEmail(dto.getEmail());
+        }
         if (dto.getDob() != null) {
             user.setDob(dto.getDob());
         }

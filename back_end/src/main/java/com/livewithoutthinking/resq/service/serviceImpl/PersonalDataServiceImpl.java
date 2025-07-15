@@ -124,11 +124,13 @@ public class PersonalDataServiceImpl implements PersonalDataService {
     }
 
     // === READ BY USERID
-    public List<PersonalDataDto> getPersonalDataByUserId(int userId) {
-        List<PersonalData> list = personalDataRepository.findByUser_UserId(userId);
-        return list.stream()
-                .map(this::toDto)
-                .toList();
+    public PersonalDataDto getPersonalDataByUserId(int userId) {
+        User user = userRepo.findUserById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        System.out.println("User: " + user);
+        PersonalData personalData = personalDataRepository.findById(user.getPersonalData().getPdId())
+                .orElseThrow(() -> new RuntimeException("Personal data not found"));
+        return toDto(personalData);
     }
 
     // === CUSTOMER ADD ===
@@ -141,8 +143,6 @@ public class PersonalDataServiceImpl implements PersonalDataService {
         PersonalData pd = new PersonalData();
         pd.setExpirationDate(dto.getExpirationDate());
         pd.setIssueDate(dto.getIssueDate());
-        pd.setUser(user);
-
         // Encrypt sensitive fields (nếu dữ liệu là raw từ client)
         pd.setCitizenNumber(encryptSafe(dto.getCitizenNumber()));
         pd.setIssuePlace(encryptSafe(dto.getIssuePlace()));
@@ -150,7 +150,10 @@ public class PersonalDataServiceImpl implements PersonalDataService {
         pd.setFrontImage(uploadService.saveEncryptedFile(frontImage));
         pd.setBackImage(uploadService.saveEncryptedFile(backImage));
         pd.setFaceImage(uploadService.saveEncryptedFile(faceImage));
+        pd.setVerificationStatus("PENDING");
         personalDataRepository.save(pd);
+        user.setPersonalData(pd);
+        userRepo.save(user);
         return pd;
     }
 
@@ -166,6 +169,14 @@ public class PersonalDataServiceImpl implements PersonalDataService {
         pd.setCitizenNumber(encryptSafe(dto.getCitizenNumber()));
         pd.setIssuePlace(encryptSafe(dto.getIssuePlace()));
         pd.setType(encryptSafe(dto.getType()));
+        pd.setVerificationStatus("PENDING");
+
+        User user = userRepo.findByPersonalData(pd.getPdId())
+                .orElseThrow(() -> new RuntimeException("Personal data not found"));
+        if(user != null) {
+            user.setStatus("WAITING");
+            userRepo.save(user);
+        }
 
         if(frontImage != null && !frontImage.isEmpty()){
             pd.setFrontImage(uploadService.saveEncryptedFile(frontImage));

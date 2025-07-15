@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:frontend/config/constansts.dart';
 import 'package:frontend/services/api.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -7,12 +9,12 @@ import 'package:intl/intl.dart';
 
 class PersonalDataDetailPage extends StatefulWidget {
   final int customerId;
-  final Map<String, dynamic> personalData;
+  final Map<String, dynamic>? personalData;
 
   const PersonalDataDetailPage({
     super.key,
     required this.customerId,
-    required this.personalData,
+    this.personalData,
   });
 
   @override
@@ -20,38 +22,231 @@ class PersonalDataDetailPage extends StatefulWidget {
 }
 
 class _PersonalDataDetailPageState extends State<PersonalDataDetailPage> {
-  bool isEditing = false;
-  bool hasUpdated = false;
-  late TextEditingController typeController;
-  late TextEditingController citizenNoController;
-  late TextEditingController issuedPlaceController;
-  late TextEditingController issuedDateController;
-  late TextEditingController expirationDateController;
+  late List<String> typeOptions;
+  String? _selectedType;
 
-  File? _frontImageFile;
-  File? _backImageFile;
-  File? _faceImageFile;
+  int pdId = 0;
+  final TextEditingController citizenNoController = TextEditingController();
+  final TextEditingController issuedPlaceController = TextEditingController();
+  final TextEditingController issuedDateController = TextEditingController();
+  final TextEditingController expirationDateController =
+      TextEditingController();
+
+  File? _frontImage;
+  File? _backImage;
+  File? _faceImage;
+
+  String? _frontImageUrl;
+  String? _backImageUrl;
+  String? _faceImageUrl;
+
   final ImagePicker _picker = ImagePicker();
+  Map<String, String> _errors = {};
 
   @override
   void initState() {
     super.initState();
-    final pd = widget.personalData;
-    typeController = TextEditingController(text: pd['type'] ?? '');
-    citizenNoController = TextEditingController(text: pd['citizenNumber'] ?? '');
-    issuedPlaceController = TextEditingController(text: pd['issuePlace'] ?? '');
-    issuedDateController = TextEditingController(text: pd['issueDate'] ?? '');
-    expirationDateController = TextEditingController(text: pd['expirationDate']?.toString() ?? '');
+    typeOptions = ["Identity Card", "Passport"];
+    final now = DateTime.now();
+
+    if (widget.personalData != null) {
+      _populateInitialData(widget.personalData!);
+    } else {
+      _selectedType = "Identity Card";
+      issuedDateController.text = _formatDate(now);
+      expirationDateController.text = _formatDate(now);
+      _fetchPersonalData();
+    }
   }
 
-  @override
-  void dispose() {
-    typeController.dispose();
-    citizenNoController.dispose();
-    issuedPlaceController.dispose();
-    issuedDateController.dispose();
-    expirationDateController.dispose();
-    super.dispose();
+  void _populateInitialData(Map<String, dynamic> data) {
+    setState(() {
+      pdId = data['pdId'] ?? 0;
+      _selectedType = data['type'] ?? "Identity Card";
+      citizenNoController.text = data['citizenNumber'] ?? '';
+      issuedPlaceController.text = data['issuePlace'] ?? '';
+      issuedDateController.text = _fromBackendFormat(data['issueDate']);
+      expirationDateController.text = _fromBackendFormat(
+        data['expirationDate'],
+      );
+
+      String stripAdminPrefix(String url) {
+        final uriParts = url.split('?');
+        final path = uriParts[0].replaceFirst('/admin/personaldoc', '');
+        final query = uriParts.length > 1 ? '?${uriParts[1]}' : '';
+        return '$path$query';
+      }
+
+      final String? frontImagePath = data['frontImageUrl'];
+      final String? backImagePath = data['backImageUrl'];
+      final String? faceImagePath = data['faceImageUrl'];
+
+      _frontImageUrl =
+          frontImagePath != null
+              ? '$baseUrl${stripAdminPrefix(frontImagePath)}'
+              : null;
+
+      _backImageUrl =
+          backImagePath != null
+              ? '$baseUrl${stripAdminPrefix(backImagePath)}'
+              : null;
+
+      _faceImageUrl =
+          faceImagePath != null
+              ? '$baseUrl${stripAdminPrefix(faceImagePath)}'
+              : null;
+    });
+  }
+
+  Future<void> _fetchPersonalData() async {
+    final result = await ApiService.getCustomerPersonalData(widget.customerId);
+    if (result != null && mounted) {
+      _populateInitialData(result);
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return "${date.day.toString().padLeft(2, '0')}/"
+        "${date.month.toString().padLeft(2, '0')}/"
+        "${date.year}";
+  }
+
+  String _fromBackendFormat(String? date) {
+    if (date == null || date.isEmpty) return '';
+    try {
+      final parsed = DateTime.parse(date);
+      return _formatDate(parsed);
+    } catch (_) {
+      return '';
+    }
+  }
+
+  Widget _buildInput(
+    TextEditingController controller, {
+    required String fieldName,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+    VoidCallback? onTap,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 56,
+          child: TextField(
+            controller: controller,
+            readOnly: onTap != null,
+            onTap: onTap,
+            keyboardType: keyboardType,
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              errorText: _errors[fieldName],
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+      ],
+    );
+  }
+
+  void _handleUpdate() async {
+    final citizenNo = citizenNoController.text.trim();
+    final issuedPlace = issuedPlaceController.text.trim();
+    final issuedDate = issuedDateController.text.trim();
+    final expirationDate = expirationDateController.text.trim();
+
+    // Chuẩn bị dữ liệu DTO
+    final personalDataDto = {
+      "type": _selectedType,
+      "citizenNumber": citizenNo,
+      "issuePlace": issuedPlace,
+      "issueDate": _toBackendFormat(issuedDate),
+      "expirationDate": _toBackendFormat(expirationDate),
+    };
+
+    try {
+      final response = await ApiService.updatePersonalData(
+        pdId: pdId,
+        personalDataDto: personalDataDto,
+        frontImage: _frontImage ?? _frontImageUrl,
+        backImage: _backImage ?? _backImageUrl,
+        faceImage: _faceImage ?? _faceImageUrl,
+      );
+
+      if (response["success"] == true) {
+        if (mounted) {
+          _showDialog("Update Success", "Document updated successfully!");
+        }
+      } else {
+        setState(() {
+          final errors = response["errors"] as Map<String, dynamic>;
+          _errors = errors.map((key, value) => MapEntry(key, value.toString()));
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
+  }
+
+  void _showDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: Center(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: Colors.green[900],
+                  fontWeight: FontWeight.bold,
+                  fontSize: 23,
+                ),
+              ),
+            ),
+            content: Text(message),
+          ),
+    );
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        //Navigator.pop(context, true); //Back page
+      }
+    });
+  }
+
+  Future<void> _selectDate(
+    BuildContext context,
+    TextEditingController controller,
+  ) async {
+    DateTime initialDate = DateTime.now();
+    try {
+      final parts = controller.text.split('/');
+      if (parts.length == 3) {
+        initialDate = DateTime(
+          int.parse(parts[2]),
+          int.parse(parts[1]),
+          int.parse(parts[0]),
+        );
+      }
+    } catch (_) {}
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        controller.text = _formatDate(picked);
+      });
+    }
   }
 
   Future<void> _pickImage(int index) async {
@@ -66,16 +261,20 @@ class _PersonalDataDetailPageState extends State<PersonalDataDetailPage> {
                 title: const Text("Take a photo"),
                 onTap: () async {
                   Navigator.pop(context);
-                  final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+                  final pickedFile = await _picker.pickImage(
+                    source: ImageSource.camera,
+                  );
                   _setPickedFile(index, pickedFile);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library),
-                title: const Text("Choose from gallery"),
+                title: const Text("Choose from album"),
                 onTap: () async {
                   Navigator.pop(context);
-                  final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+                  final pickedFile = await _picker.pickImage(
+                    source: ImageSource.gallery,
+                  );
                   _setPickedFile(index, pickedFile);
                 },
               ),
@@ -89,95 +288,107 @@ class _PersonalDataDetailPageState extends State<PersonalDataDetailPage> {
   void _setPickedFile(int index, XFile? pickedFile) {
     if (pickedFile != null) {
       setState(() {
-        if (index == 1) {
-          _frontImageFile = File(pickedFile.path);
-        } else if (index == 2) {
-          _backImageFile = File(pickedFile.path);
-        } else {
-          _faceImageFile = File(pickedFile.path);
+        switch (index) {
+          case 1:
+            _frontImage = File(pickedFile.path);
+            _frontImageUrl = null;
+            break;
+          case 2:
+            _backImage = File(pickedFile.path);
+            _backImageUrl = null;
+            break;
+          case 3:
+            _faceImage = File(pickedFile.path);
+            _faceImageUrl = null;
+            break;
         }
       });
     }
   }
 
-
-  Future<void> _handleUpdate() async {
-    final customerId = widget.customerId;
-    final type = typeController.text.trim();
-    final citizenNo = citizenNoController.text.trim();
-    final issuedPlace = issuedPlaceController.text.trim();
-    final issuedDate = issuedDateController.text.trim();
-    final expirationDate = expirationDateController.text.trim();
-
-    final dto = {
-      "type": type,
-      "citizenNumber": citizenNo,
-      "issuePlace": issuedPlace,
-      "issueDate": issuedDate,
-      "expirationDate": expirationDate,
-    };
-
-    final result = await ApiService.updatePersonalData(
-      pdId: widget.personalData['pdId'],
-      personalDataDto: dto,
-      frontImage: _frontImageFile,
-      backImage: _backImageFile,
-      faceImage: _faceImageFile,
-    );
-
-    setState(() {
-      isEditing = false;
-      hasUpdated = true;
-    });
-    if (!mounted) return;
-    if (result['success'] == true) {
-      setState(() {
-        isEditing = false;
-        hasUpdated = true;
-      });
-      _showDialog("Update Success", "Your personal data is updated!");
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: ${result['errors']}")),
-      );
-    }
+  String _toBackendFormat(String input) {
+    final inputFormat = DateFormat("dd/MM/yyyy");
+    final outputFormat = DateFormat("yyyy-MM-dd");
+    final parsedDate = inputFormat.parseStrict(input);
+    return outputFormat.format(parsedDate);
   }
+
+  Widget _buildImagePicker({
+    required int index,
+    required String fieldName,
+    File? imageFile,
+    String? imageUrl,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () => _pickImage(index),
+          child: AspectRatio(
+            aspectRatio: 1.6,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Color(0xFF013171)!),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child:
+                  imageFile != null
+                      ? ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.file(imageFile, fit: BoxFit.cover),
+                      )
+                      : (imageUrl != null
+                          ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(imageUrl, fit: BoxFit.cover),
+                          )
+                          : Center(
+                            child: Icon(
+                              Icons.add_circle_outline,
+                              color: Color(0xFF013171),
+                              size: 40,
+                            ),
+                          )),
+            ),
+          ),
+        ),
+        if (_errors[fieldName] != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4, left: 4),
+            child: Text(
+              _errors[fieldName]!,
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          ),
+      ],
+    );
+  }
+
+  static const TextStyle _labelStyle = TextStyle(
+    fontFamily: "Raleway",
+    fontWeight: FontWeight.bold,
+    fontSize: 16,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final v = widget.personalData;
-    final String baseUrl = 'http://192.168.1.100:9090/api/resq/customer';
-
-    String stripAdminPrefix(String url) {
-      final uriParts = url.split('?');
-      final path = uriParts[0].replaceFirst('/admin/personaldoc', '');
-      final query = uriParts.length > 1 ? '?${uriParts[1]}' : '';
-      return '$path$query';
-    }
-
-    final String? frontImagePath = v['frontImageUrl'];
-    final String? backImagePath = v['backImageUrl'];
-    final String? faceImagePath = v['faceImageUrl'];
-
-    final String? frontImageUrl = frontImagePath != null
-        ? '$baseUrl${stripAdminPrefix(frontImagePath)}'
-        : null;
-    final String? backImageUrl = backImagePath != null
-        ? '$baseUrl${stripAdminPrefix(backImagePath)}'
-        : null;
-    final String? faceImageUrl = faceImagePath != null
-        ? '$baseUrl${stripAdminPrefix(faceImagePath)}'
-        : null;
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.blue[900],
+        backgroundColor: Color(0xFF013171),
         centerTitle: true,
-        title: const Text("Personal Document", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text(
+          "Edit Personal Document",
+          style: TextStyle(
+            fontFamily: 'Raleway',
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            fontSize: 24,
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.pop(context, hasUpdated),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(
@@ -185,52 +396,148 @@ class _PersonalDataDetailPageState extends State<PersonalDataDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildField("Document Type:", typeController, enabled: false),
-            _buildField("Citizen Number:", citizenNoController, enabled: isEditing),
-            _buildField("Issued Place:", issuedPlaceController, enabled: isEditing),
-            _buildField("Issued Date:", issuedDateController, enabled: isEditing, isDate: true),
-            _buildField("Expiration Date:", expirationDateController, enabled: isEditing, isDate: true),
-            const SizedBox(height: 30),
-            const Text("Document Images:", style: _labelStyle),
-            const SizedBox(height: 10),
+            const Text("Document Type:", style: _labelStyle),
+            const SizedBox(height: 6),
+            DropdownButtonFormField<String>(
+              value: _selectedType,
+              items:
+                  typeOptions.map((type) {
+                    return DropdownMenuItem(value: type, child: Text(type));
+                  }).toList(),
+              onChanged: (value) => setState(() => _selectedType = value),
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                errorText: _errors["type"],
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text("Citizen Number:", style: _labelStyle),
+            const SizedBox(height: 6),
+            _buildInput(citizenNoController, fieldName: "citizenNumber"),
+            const SizedBox(height: 20),
+            const Text("Issued Place:", style: _labelStyle),
+            const SizedBox(height: 6),
+            _buildInput(issuedPlaceController, fieldName: "issuePlace"),
+            const SizedBox(height: 20),
+            const Text("Issued Date:", style: _labelStyle),
+            const SizedBox(height: 6),
+            _buildInput(
+              issuedDateController,
+              fieldName: "issueDate",
+              keyboardType: TextInputType.none,
+              onTap: () => _selectDate(context, issuedDateController),
+            ),
+            const SizedBox(height: 20),
+            const Text("Expiration Date:", style: _labelStyle),
+            const SizedBox(height: 6),
+            _buildInput(
+              expirationDateController,
+              fieldName: "expirationDate",
+              keyboardType: TextInputType.none,
+              onTap: () => _selectDate(context, expirationDateController),
+            ),
+            const SizedBox(height: 20),
+            const Text("Document Image:", style: _labelStyle),
+            const SizedBox(height: 5),
             Row(
               children: [
-                Expanded(child: _buildImagePicker(1, _frontImageFile, frontImageUrl, "Front Image")),
+                Expanded(
+                  child: _buildImagePicker(
+                    index: 1,
+                    fieldName: 'frontImage',
+                    imageFile: _frontImage,
+                    imageUrl: _frontImageUrl,
+                  ),
+                ),
                 const SizedBox(width: 16),
-                Expanded(child: _buildImagePicker(2, _backImageFile, backImageUrl, "Back Image")),
+                Expanded(
+                  child: _buildImagePicker(
+                    index: 2,
+                    fieldName: 'backImage',
+                    imageFile: _backImage,
+                    imageUrl: _backImageUrl,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 20),
             const Text("Face Photo:", style: _labelStyle),
-            const SizedBox(height: 10),
-            //_buildImagePicker(3, _faceImageFile, faceImageUrl, "Face Image"),
+            const SizedBox(height: 5),
             SizedBox(
-              height: 112.5, // hoặc kích thước tùy ý
+              height: 134,
               width: 180,
-              child: _buildImagePicker(3, _faceImageFile, faceImageUrl, "Face Image"),
+              child: _buildImagePicker(
+                index: 3,
+                fieldName: 'faceImage',
+                imageFile: _faceImage,
+                imageUrl: _faceImageUrl,
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
+                  onPressed: _handleUpdate,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF013171),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    "Save",
+                    style: TextStyle(
+                      fontFamily: 'Lexend',
+                      fontSize: 17,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20),
+
+                ElevatedButton(
                   onPressed: () async {
-                    if (isEditing) {
-                      await _handleUpdate();
+                    setState(() {
+                      _errors = {};
+                    });
+
+                    if (widget.personalData != null) {
+                      _populateInitialData(widget.personalData!);
                     } else {
-                      setState(() => isEditing = true);
+                      await _fetchPersonalData();
                     }
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[900]),
-                  child: Text(isEditing ? "Save" : "Edit", style: const TextStyle(color: Colors.white)),
-                ),
-                const SizedBox(width: 16),
-                if (isEditing)
-                  ElevatedButton(
-                    onPressed: () => setState(() => isEditing = false),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    child: const Text("Cancel", style: TextStyle(color: Colors.white)),
+
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFC30003),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
+                  child: const Text(
+                    "Reset",
+                    style: TextStyle(
+                      fontFamily: 'Lexend',
+                      fontSize: 17,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ],
             ),
           ],
@@ -238,105 +545,4 @@ class _PersonalDataDetailPageState extends State<PersonalDataDetailPage> {
       ),
     );
   }
-
-  Widget _buildField(String label, TextEditingController controller, {
-    bool enabled = false,
-    bool isDate = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: _labelStyle),
-          const SizedBox(height: 6),
-          TextField(
-            controller: controller,
-            readOnly: isDate,
-            enabled: enabled,
-            onTap: enabled && isDate
-                ? () async {
-              final DateTime? picked = await showDatePicker(
-                context: context,
-                initialDate: DateTime.tryParse(controller.text) ?? DateTime.now(),
-                firstDate: DateTime(1900),
-                lastDate: DateTime(2100),
-              );
-              if (picked != null) {
-                controller.text = picked.toIso8601String().split('T')[0]; // yyyy-MM-dd
-              }
-            }
-                : null,
-            style: TextStyle(color: !enabled ? Colors.grey[700] : Colors.black),
-            decoration: InputDecoration(
-              filled: !enabled,
-              fillColor: enabled ? null : Colors.grey.shade100,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-              suffixIcon: isDate && enabled ? const Icon(Icons.calendar_today, size: 20) : null,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildImagePicker(int index, File? imageFile, String? imageUrl, String label) {
-    return GestureDetector(
-      onTap: () => isEditing ? _pickImage(index) : null,
-      child: AspectRatio(
-        aspectRatio: 1.6,
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.blue[900]!),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: imageFile != null
-                ? Image.file(imageFile, fit: BoxFit.cover)
-                : imageUrl != null
-                ? Image.network(imageUrl, fit: BoxFit.cover)
-                : Center(child: Text(label, style: TextStyle(color: Colors.grey[600]))),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Center(
-          child: Text(
-            title,
-            style: TextStyle(
-              fontFamily: 'Raleway',
-              fontSize: 23,
-              color: Colors.green[900],
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        content: Text(
-          message,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontFamily: 'Lexend', fontSize: 17),
-        ),
-      ),
-    );
-
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
-    });
-  }
-
-  static const TextStyle _labelStyle = TextStyle(
-    fontWeight: FontWeight.bold,
-    color: Colors.black,
-    fontSize: 16,
-  );
 }

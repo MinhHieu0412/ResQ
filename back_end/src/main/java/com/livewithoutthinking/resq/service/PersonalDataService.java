@@ -21,7 +21,7 @@ public interface PersonalDataService {
 
     byte[] getDecryptedImage(String path) throws Exception;
 
-    List<PersonalDataDto> getPersonalDataByUserId(int userId);
+    PersonalDataDto getPersonalDataByUserId(int userId);
 
     PersonalDataDto toDto(PersonalData pd);
 

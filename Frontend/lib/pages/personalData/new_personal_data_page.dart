@@ -8,12 +8,10 @@ import 'package:intl/intl.dart';
 
 class NewPersonalDataPage extends StatefulWidget {
   final int customerId;
-  final List<String> availableTypes;
 
   const NewPersonalDataPage({
     super.key,
-    required this.customerId,
-    required this.availableTypes,
+    required this.customerId
   });
 
   @override
@@ -40,13 +38,14 @@ class _NewPersonalDataPageState extends State<NewPersonalDataPage> {
   @override
   void initState() {
     super.initState();
-    typeOptions = widget.availableTypes;
-    _selectedType = typeOptions.isNotEmpty ? typeOptions.first : null;
+    typeOptions = ["Identity Card", "Passport"];
+    _selectedType = "Identity Card"; // Mặc định là "Identity Card"
 
     final now = DateTime.now();
     issuedDateController.text = _formatDate(now);
     expirationDateController.text = _formatDate(now);
   }
+
 
   String _formatDate(DateTime date) {
     return "${date.day.toString().padLeft(2, '0')}/"
@@ -245,33 +244,6 @@ class _NewPersonalDataPageState extends State<NewPersonalDataPage> {
     );
   }
 
-  // Widget _buildImagePicker({required int index, File? imageFile}) {
-  //   return GestureDetector(
-  //     onTap: () => _pickImage(index),
-  //     child: AspectRatio(
-  //       aspectRatio: 1.6,
-  //       child: Container(
-  //         decoration: BoxDecoration(
-  //           border: Border.all(color: Colors.blue[900]!),
-  //           borderRadius: BorderRadius.circular(8),
-  //         ),
-  //         child: imageFile != null
-  //             ? ClipRRect(
-  //           borderRadius: BorderRadius.circular(8),
-  //           child: Image.file(imageFile, fit: BoxFit.cover),
-  //         )
-  //             : Center(
-  //           child: Icon(
-  //             Icons.add_circle_outline,
-  //             color: Colors.blue[900],
-  //             size: 40,
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget _buildImagePicker({
     required int index,
     required String fieldName,
@@ -286,7 +258,7 @@ class _NewPersonalDataPageState extends State<NewPersonalDataPage> {
             aspectRatio: 1.6,
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.blue[900]!),
+                border: Border.all(color: Color(0xFF013171)!),
                 borderRadius: BorderRadius.circular(8),
               ),
               child:
@@ -298,7 +270,7 @@ class _NewPersonalDataPageState extends State<NewPersonalDataPage> {
                       : Center(
                         child: Icon(
                           Icons.add_circle_outline,
-                          color: Colors.blue[900],
+                          color: Color(0xFF013171),
                           size: 40,
                         ),
                       ),
@@ -322,10 +294,10 @@ class _NewPersonalDataPageState extends State<NewPersonalDataPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.blue[900],
+        backgroundColor: Color(0xFF013171),
         centerTitle: true,
         title: const Text(
-          "New Personal Document",
+          "Create Personal Document",
           style: TextStyle(
             fontFamily: 'Raleway',
             fontWeight: FontWeight.w700,
@@ -347,19 +319,13 @@ class _NewPersonalDataPageState extends State<NewPersonalDataPage> {
             const SizedBox(height: 6),
             DropdownButtonFormField<String>(
               value: _selectedType,
-              items:
-                  typeOptions.map((type) {
-                    return DropdownMenuItem(value: type, child: Text(type));
-                  }).toList(),
+              items: typeOptions.map((type) {
+                return DropdownMenuItem(value: type, child: Text(type));
+              }).toList(),
               onChanged: (value) => setState(() => _selectedType = value),
               decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 14,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                 errorText: _errors["type"],
               ),
             ),
@@ -415,7 +381,7 @@ class _NewPersonalDataPageState extends State<NewPersonalDataPage> {
             const Text("Face Photo:", style: _labelStyle),
             const SizedBox(height: 5),
             SizedBox(
-              height: 112.5,
+              height: 134,
               width: 180,
               child: _buildImagePicker(
                 index: 3,
@@ -428,7 +394,7 @@ class _NewPersonalDataPageState extends State<NewPersonalDataPage> {
               child: ElevatedButton(
                 onPressed: _handleSave,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[900],
+                  backgroundColor: Color(0xFF013171),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 40,
                     vertical: 12,
