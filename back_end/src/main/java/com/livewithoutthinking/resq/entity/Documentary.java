@@ -17,7 +17,7 @@ public class Documentary {
     private int documentId; 
 
     @ManyToOne
-    @JoinColumn(name = "PartnerID", referencedColumnName = "PartnerID")
+    @JoinColumn(name = "PartnerID", referencedColumnName = "PartnerID", nullable = true)
     private Partner partner; // Liên kết với bảng Partner qua PartnerID
 
     @ManyToOne

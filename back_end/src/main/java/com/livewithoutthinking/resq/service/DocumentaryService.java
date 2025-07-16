@@ -25,4 +25,5 @@ public interface DocumentaryService {
                           MultipartFile frontImage, MultipartFile backImage) throws Exception;
     Documentary updateCusDoc(DocumentaryDto documentaryDto, MultipartFile frontImage,
                              MultipartFile backImage) throws Exception;
+    void deleteDocument(int documentId);
 }

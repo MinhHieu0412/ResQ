@@ -36,4 +36,5 @@ public interface PersonalDataService {
 
     PersonalData updatePersonalData(PersonalDataDto dto, MultipartFile frontImage,
                                     MultipartFile backImage, MultipartFile faceImage) throws Exception;
+
 }

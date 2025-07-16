@@ -1,11 +1,15 @@
 package com.livewithoutthinking.resq.service;
 
+import com.livewithoutthinking.resq.dto.DocumentaryDto;
 import com.livewithoutthinking.resq.dto.VehicleDto;
+import com.livewithoutthinking.resq.entity.Documentary;
 import com.livewithoutthinking.resq.entity.User;
 import com.livewithoutthinking.resq.entity.Vehicle;
+import com.livewithoutthinking.resq.repository.DocumentaryRepository;
 import com.livewithoutthinking.resq.repository.UserRepository;
 import com.livewithoutthinking.resq.repository.VehicleRepository;
 import com.livewithoutthinking.resq.util.AESEncryptionUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,11 +23,15 @@ public class VehicleService {
     private final VehicleRepository vehicleRepository;
     private final UploadService uploadService;
     private final UserRepository userRepository;
+    private final DocumentaryRepository documentaryRepository;
+    @Autowired
+    private DocumentaryService documentaryService;
 
-    public VehicleService(VehicleRepository vehicleRepository, UploadService uploadService, UserRepository userRepository) {
+    public VehicleService(VehicleRepository vehicleRepository, UploadService uploadService, UserRepository userRepository, DocumentaryRepository documentaryRepository) {
         this.vehicleRepository = vehicleRepository;
         this.uploadService = uploadService;
         this.userRepository = userRepository;
+        this.documentaryRepository = documentaryRepository;
     }
 
     // === CREATE ===
@@ -52,7 +60,7 @@ public class VehicleService {
         return vehicleRepository.save(v);
     }
 
-    // === CREATE CUSTOMER ===
+    // === CUSTOMER CREATE ===
     public Vehicle addCustomerVehicle(VehicleDto vehicleDto, MultipartFile frontImage, MultipartFile backImage) throws Exception {
         Vehicle v = new Vehicle();
         User user = userRepository.findById(vehicleDto.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
@@ -69,7 +77,7 @@ public class VehicleService {
         return v;
     }
 
-    // === UPDATE CUSTOMER ===
+    // === CUSTOMER UPDATE ===
     public Vehicle updateCustomerVehicle(VehicleDto vehicleDto, MultipartFile frontImage, MultipartFile backImage) throws Exception
     {
         Vehicle v = vehicleRepository.findById(vehicleDto.getVehicleId()).orElseThrow(() -> new RuntimeException("Vehicle not found"));
@@ -91,6 +99,22 @@ public class VehicleService {
         }
         vehicleRepository.save(v);
         return v;
+    }
+
+    // === CUSTOMER DELETE ====
+    public void deleteVehicle(int vehicleId){
+        Vehicle v = vehicleRepository.findById(vehicleId)
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+        String plateNo = decryptSafe(v.getPlateNo());
+        List<DocumentaryDto> listDoc = documentaryService.getAllDecrypted();
+        for(DocumentaryDto d : listDoc){
+            if(d.getDocumentType().contains(plateNo)){
+                Documentary doc = documentaryRepository.findById(d.getDocumentId())
+                        .orElseThrow(() -> new RuntimeException("Document not found"));
+                documentaryRepository.delete(doc);
+            }
+        }
+        vehicleRepository.delete(v);
     }
 
     // === READ ALL ===

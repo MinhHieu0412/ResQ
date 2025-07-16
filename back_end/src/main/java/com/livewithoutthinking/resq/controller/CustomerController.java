@@ -131,6 +131,24 @@ public class CustomerController {
         }
     }
 
+    @DeleteMapping("/vehicles/{sVehicleId}")
+    public ResponseEntity<Map<String, String>> deleteVehicle(@PathVariable("sVehicleId") String sVehicleId) {
+        try {
+            Integer vehicleId = Integer.parseInt(sVehicleId);
+            vehicleService.deleteVehicle(vehicleId);
+            return ResponseEntity.ok(Map.of("message", "Deleted vehicle sucessfully"));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "ID is invalid: " + e.getMessage())
+            );
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    Map.of("error", "System error: " + e.getMessage())
+            );
+        }
+    }
+
+
 
     // Personal Data
     @GetMapping("/personaldata/{customerId}")
@@ -196,7 +214,6 @@ public class CustomerController {
                     .badRequest().body("Error parsing vehicleDtoString: " + e.getMessage());
         }
     }
-
     //Documents
     @GetMapping("/documents/{customerId}")
     public ResponseEntity<?> getDocument(@PathVariable("customerId") int customerId) {
@@ -256,6 +273,22 @@ public class CustomerController {
         }
     }
 
+    @DeleteMapping("/documents/{sDocumentId}")
+    public ResponseEntity<Map<String, String>> deleteDocument(@PathVariable("sDocumentId") String sDocumentId) {
+        try {
+            Integer documentId = Integer.parseInt(sDocumentId);
+            documentaryService.deleteDocument(documentId);
+            return ResponseEntity.ok(Map.of("message", "Deleted document sucessfully"));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "ID is invalid: " + e.getMessage())
+            );
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    Map.of("error", "System error: " + e.getMessage())
+            );
+        }
+    }
 
     //Support
     private <T> ResponseEntity<T> ok(T body) {

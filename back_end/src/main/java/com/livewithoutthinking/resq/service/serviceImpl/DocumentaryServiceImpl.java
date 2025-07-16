@@ -149,6 +149,7 @@ public class DocumentaryServiceImpl implements DocumentaryService {
         return result;
     }
 
+    // === CUSTOMER ADD ===
     public Documentary addCusDoc(DocumentaryDto documentaryDto, int userId,
                                  MultipartFile frontImage, MultipartFile backImage) throws Exception {
         Documentary doc = new Documentary();
@@ -167,6 +168,7 @@ public class DocumentaryServiceImpl implements DocumentaryService {
         return doc;
     }
 
+    // === CUSTOMER UPDATE ===
     public Documentary updateCusDoc(DocumentaryDto documentaryDto, MultipartFile frontImage,
                                     MultipartFile backImage) throws Exception {
         Documentary doc = documentaryRepository.findById(documentaryDto.getDocumentId())
@@ -186,6 +188,13 @@ public class DocumentaryServiceImpl implements DocumentaryService {
         return doc;
     }
 
+    // === CUSTOMER DELETE ===
+    public void deleteDocument(int documentId){
+        Documentary document = documentaryRepository.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+        documentaryRepository.delete(document);
+    }
+
     public byte[] getDecryptedImage(String decryptedPath) throws IOException {
         File file = new File(decryptedPath);
         if (!file.exists()) {
@@ -198,7 +207,9 @@ public class DocumentaryServiceImpl implements DocumentaryService {
         DocumentaryDto dto = new DocumentaryDto();
 
         dto.setDocumentId(doc.getDocumentId());
-        dto.setPartnerId(doc.getPartner().getPartnerId());
+        if(doc.getPartner()!=null){
+            dto.setPartnerId(doc.getPartner().getPartnerId());
+        }
         dto.setDocumentType(decryptSafe(doc.getDocumentType()));
         dto.setDocumentNumber(decryptSafe(doc.getDocumentNumber()));
         dto.setDocumentStatus(doc.getDocumentStatus());

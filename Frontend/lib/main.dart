@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/pages/documentary/documentaries_page.dart';
-import 'package:frontend/pages/documentary/documentary_detail_page.dart';
-import 'package:frontend/pages/documentary/new_documentary_page.dart';
-import 'package:frontend/pages/login_page.dart';
-import 'package:frontend/pages/personalData/personal_data_detail_page.dart';
-import 'package:frontend/pages/personalData/new_personal_data_page.dart';
-import 'package:frontend/pages/profile/profile_page.dart';
-import 'package:frontend/pages/vehicles/new_vehicle_page.dart';
-import 'package:frontend/pages/vehicles/vehicle_detail_page.dart';
-import 'package:frontend/pages/vehicles/vehicles_page.dart';
-
+import 'package:frontend/screens/customer/documentary/documentaries_page.dart';
+import 'package:frontend/screens/customer/documentary/documentary_detail_page.dart';
+import 'package:frontend/screens/customer/documentary/new_documentary_page.dart';
+import 'package:frontend/screens/customer/login_page.dart';
+import 'package:frontend/screens/customer/personalData/new_personal_data_page.dart';
+import 'package:frontend/screens/customer/personalData/personal_data_detail_page.dart';
+import 'package:frontend/screens/customer/profile/profile_page.dart';
+import 'package:frontend/screens/customer/vehicles/new_vehicle_page.dart';
+import 'package:frontend/screens/customer/vehicles/vehicle_detail_page.dart';
+import 'package:frontend/screens/customer/vehicles/vehicles_page.dart';
 void main() {
   runApp(const MyApp());
 }

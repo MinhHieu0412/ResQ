@@ -16,4 +16,7 @@ public interface DocumentaryRepository extends JpaRepository<Documentary, Intege
 
     @Query("SELECT doc FROM Documentary doc WHERE doc.documentType = :type AND doc.partner.partnerId = :partnerId")
     Documentary getDocumentaryByType(String type, int partnerId);
+
+    @Query("SELECT doc FROM Documentary doc WHERE doc.documentType LIKE :plateNo")
+    List<Documentary> getDocumentaryByPlateNo(String plateNo);
 }
