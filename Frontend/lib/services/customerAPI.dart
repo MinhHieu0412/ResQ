@@ -30,9 +30,9 @@ class ApiService {
   static Future<Map<String, dynamic>> updateCustomer(
     int customerId,
     Map<String, dynamic> customerDto,
-  ) async {
+  ) async
+  {
     final url = Uri.parse('$baseUrl/updateCustomer/$customerId');
-
     try {
       final response = await http.put(
         url,
@@ -66,7 +66,8 @@ class ApiService {
 
   ///Vehicle///
   // Get Customer Vehicle
-  static Future<List<dynamic>> getCustomerVehicles(int customerId) async {
+  static Future<List<dynamic>> getCustomerVehicles(int customerId) async
+  {
     final url = Uri.parse('$baseUrl/vehicles/$customerId');
     try {
       final response = await http.get(
@@ -97,7 +98,8 @@ class ApiService {
     required int year,
     required File? frontImage,
     required File? backImage,
-  }) async {
+  }) async
+  {
     final uri = Uri.parse('$baseUrl/vehicles/createNew');
     final vehicleDto = {
       "userId": customerId,
@@ -138,7 +140,7 @@ class ApiService {
     };
   }
 
-  // Update Vehicle Info
+  // Update Vehicle
   static Future<Map<String, dynamic>> updateVehicle({
     required int vehicleId,
     required int userId,
@@ -148,7 +150,8 @@ class ApiService {
     required int year,
     File? frontImage,
     File? backImage,
-  }) async {
+  }) async
+  {
     final uri = Uri.parse('$baseUrl/vehicles/updateVehicle/$vehicleId');
 
     // Tạo MultipartRequest với method PUT
@@ -207,11 +210,40 @@ class ApiService {
     }
   }
 
+  // Delete Vehicle
+  static Future<void> deleteVehicle(int vehicleId) async
+  {
+    final url = Uri.parse('$baseUrl/vehicles/$vehicleId');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': 'Bearer your_token', nếu có
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("Delete sucess: ${data['message']}");
+      } else if (response.statusCode == 204) {
+        print("Delete sucess (no content)");
+      } else {
+        print("Delete fail: ${response.statusCode}");
+        print("Fail: ${response.body}");
+      }
+    } catch (e) {
+      print("⚠️ Call API error: $e");
+    }
+  }
+
   ///Personal Data///
   // Get Personal Data
   static Future<Map<String, dynamic>> getCustomerPersonalData(
     int customerId,
-  ) async {
+  ) async
+  {
     final url = Uri.parse('$baseUrl/personaldata/$customerId');
     try {
       final response = await http.get(
@@ -247,7 +279,8 @@ class ApiService {
     required File? frontImage,
     required File? backImage,
     required File? faceImage,
-  }) async {
+  }) async
+  {
     final uri = Uri.parse('$baseUrl/personaldata/createNew');
     try {
       final personalDataDtoString = jsonEncode(personalDataDto);
@@ -298,7 +331,8 @@ class ApiService {
     required dynamic frontImage,
     required dynamic backImage,
     required dynamic faceImage,
-  }) async {
+  }) async
+  {
     final uri = Uri.parse('$baseUrl/personaldata/updatePd/${pdId}');
     try {
       print("PD ID $pdId");
@@ -384,7 +418,8 @@ class ApiService {
     required Map<String, dynamic> documentDto,
     required File? frontImage,
     required File? backImage,
-  }) async {
+  }) async
+  {
     final uri = Uri.parse('$baseUrl/documents/createNew');
     try {
       final documentDtoString = jsonEncode(documentDto);
@@ -429,7 +464,8 @@ class ApiService {
     required Map<String, dynamic> documentDto,
     required dynamic frontImage,
     required dynamic backImage,
-  }) async {
+  }) async
+  {
     final uri = Uri.parse('$baseUrl/documents/updateDocument/${documentId}');
     try {
       final documentDtoString = jsonEncode(documentDto);
@@ -470,6 +506,33 @@ class ApiService {
       };
     } catch (e) {
       throw Exception('Connection error: $e');
+    }
+  }
+
+  // Delete Document
+  static Future<void> deleteDocument(int documentId) async
+  {
+    final url = Uri.parse('$baseUrl/documents/$documentId');
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': 'Bearer your_token', nếu có
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("Delete sucess: ${data['message']}");
+      } else if (response.statusCode == 204) {
+        print("Delete sucess (no content)");
+      } else {
+        print("❌ Delete Fail: ${response.statusCode}");
+        print("Fail: ${response.body}");
+      }
+    } catch (e) {
+      print("⚠️ Call API error: $e");
     }
   }
 }
