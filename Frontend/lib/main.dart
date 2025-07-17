@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/screens/customer/discount/vouchers_page.dart';
 import 'package:frontend/screens/customer/documentary/documentaries_page.dart';
 import 'package:frontend/screens/customer/documentary/documentary_detail_page.dart';
 import 'package:frontend/screens/customer/documentary/new_documentary_page.dart';
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
         '/newDocument': (context) => NewDocumentaryPage(customerId: 150),
         '/vehicle': (context) => VehiclesPage(customerId: 150),
         '/newVehicle': (context) => NewVehiclePage(customerId: 150),
+        '/discount': (context) => VouchersPage(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/vehicleDetail') {

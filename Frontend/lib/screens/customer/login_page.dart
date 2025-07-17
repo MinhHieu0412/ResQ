@@ -132,6 +132,12 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
             : Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/discount');
+              },
+              child: const Text("Go to Discount Vouchers"),
+            ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {

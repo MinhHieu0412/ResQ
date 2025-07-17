@@ -105,7 +105,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
                           vehicles == null || vehicles!.isEmpty
                               ? const Center(
                                 child: Text(
-                                  "No vehicles found",
+                                  "No vehicle",
                                   style: TextStyle(
                                     fontFamily: 'Lexend',
                                     fontSize: 18,

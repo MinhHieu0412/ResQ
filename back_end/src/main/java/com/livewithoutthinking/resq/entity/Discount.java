@@ -2,6 +2,7 @@ package com.livewithoutthinking.resq.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -32,6 +33,9 @@ public class Discount {
 
     @Column(name = "Status", nullable = false)
     private String status; // Trạng thái (ví dụ: "Success", "Fail")
+
+    @Column(name = "ApplyDate")
+    private Date applyDate;
 
     @Column(name = "Code", nullable = false, unique = true)
     private String code; // Mã giảm giá (ví dụ: "SUMMER2025")

@@ -7,11 +7,8 @@ import com.livewithoutthinking.resq.dto.PersonalDataDto;
 import com.livewithoutthinking.resq.dto.UserDto;
 import com.livewithoutthinking.resq.dto.VehicleDto;
 import com.livewithoutthinking.resq.helpers.ApiResponse;
-import com.livewithoutthinking.resq.repository.DocumentaryRepository;
-import com.livewithoutthinking.resq.service.CustomerService;
-import com.livewithoutthinking.resq.service.DocumentaryService;
-import com.livewithoutthinking.resq.service.PersonalDataService;
-import com.livewithoutthinking.resq.service.VehicleService;
+import com.livewithoutthinking.resq.service.*;
+import com.livewithoutthinking.resq.service.serviceImpl.UserRankService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -43,6 +40,12 @@ public class CustomerController {
     private DocumentaryService documentaryService;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private UserDiscountService userDiscountService;
+    @Autowired
+    private DiscountService discountService;
+    @Autowired
+    private UserRankService userRankService;
 
     // Profile
     @GetMapping("/{customerId}")
@@ -117,7 +120,7 @@ public class CustomerController {
         try {
             VehicleDto vehicleDto = objectMapper.readValue(vehicleDtoString, VehicleDto.class);
 
-            if(vehicleDto.getVehicleId() != vehicleId || vehicleDto.getVehicleId() == 0) {
+            if (vehicleDto.getVehicleId() != vehicleId || vehicleDto.getVehicleId() == 0) {
                 vehicleDto.setVehicleId(vehicleId);
             }
             Map<String, String> errors = validateVehicle(vehicleDto);
@@ -147,7 +150,6 @@ public class CustomerController {
             );
         }
     }
-
 
 
     // Personal Data
@@ -193,14 +195,14 @@ public class CustomerController {
 
     @PutMapping("/personaldata/updatePd/{pdId}")
     public ResponseEntity<?> updatePersonalData(@PathVariable("pdId") String pdId,
-                                             @RequestPart("personalDataDtoString") String personalDataDtoString,
-                                             @RequestPart(value = "frontImage", required = false) MultipartFile frontImage,
-                                             @RequestPart(value = "backImage", required = false) MultipartFile backImage,
-                                             @RequestPart(value = "faceImage", required = false) MultipartFile faceImage) {
+                                                @RequestPart("personalDataDtoString") String personalDataDtoString,
+                                                @RequestPart(value = "frontImage", required = false) MultipartFile frontImage,
+                                                @RequestPart(value = "backImage", required = false) MultipartFile backImage,
+                                                @RequestPart(value = "faceImage", required = false) MultipartFile faceImage) {
         try {
             PersonalDataDto personalDataDto = objectMapper.readValue(personalDataDtoString, PersonalDataDto.class);
             Integer personalDataId = Integer.parseInt(pdId);
-            if(personalDataDto.getPdId() != personalDataId || personalDataDto.getPdId() == 0) {
+            if (personalDataDto.getPdId() != personalDataId || personalDataDto.getPdId() == 0) {
                 personalDataDto.setPdId(personalDataId);
             }
             System.out.println(personalDataDto);
@@ -214,6 +216,7 @@ public class CustomerController {
                     .badRequest().body("Error parsing vehicleDtoString: " + e.getMessage());
         }
     }
+
     //Documents
     @GetMapping("/documents/{customerId}")
     public ResponseEntity<?> getDocument(@PathVariable("customerId") int customerId) {
@@ -258,7 +261,7 @@ public class CustomerController {
         try {
             DocumentaryDto documentDto = objectMapper.readValue(documentDtoString, DocumentaryDto.class);
             Integer documentId = Integer.parseInt(sDocumentId);
-            if(documentDto.getDocumentId() != documentId || documentDto.getDocumentId() == 0) {
+            if (documentDto.getDocumentId() != documentId || documentDto.getDocumentId() == 0) {
                 documentDto.setDocumentId(documentId);
             }
             Map<String, String> errors = validateDocument(documentDto);
@@ -290,6 +293,48 @@ public class CustomerController {
         }
     }
 
+    //Discount
+    @GetMapping("/discounts/appDiscounts/{userId}")
+    public ResponseEntity<?> getAppDiscounts(@PathVariable("userId") int userId) {
+         try{
+             return ok(discountService.getAppDiscounts(userId));
+         }catch(Exception e){
+             return ResponseEntity.internalServerError().body(
+                     Map.of("error", "System error: " + e.getMessage())
+             );
+         }
+    }
+
+    @GetMapping("/discounts/rankDiscounts/{userId}")
+    public ResponseEntity<?> getRankDiscounts(@PathVariable("userId") int userId) {
+        try{
+            return ok(discountService.getRankedDiscounts(userId));
+        }catch(Exception e){
+            return ResponseEntity.internalServerError().body(
+                    Map.of("error", "System error: " + e.getMessage())
+            );
+        }
+
+    }
+
+    @GetMapping("/discounts/myDiscounts/{userId}")
+    public ResponseEntity<?> getMyDiscount(@PathVariable("userId") int userId) {
+        try {
+            return ok(userDiscountService.findByUserId(userId));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest().body("Error parsing vehicleDtoString: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/discounts/claimDiscount")
+    public ResponseEntity<?> claimDiscount(@RequestBody Map<String, Integer> body) {
+        int discountId = body.get("discountId");
+        int userId = body.get("userId");
+        discountService.claimDiscount(discountId, userId);
+        return ResponseEntity.ok("Claimed successfully");
+    }
+
     //Support
     private <T> ResponseEntity<T> ok(T body) {
         return ResponseEntity.ok(body);
@@ -311,14 +356,14 @@ public class CustomerController {
     }
 
     //Validate
-    private Map<String, String> validateProfile(UserDto dto){
+    private Map<String, String> validateProfile(UserDto dto) {
         Map<String, String> errors = new HashMap<>();
-        if(dto.getUsername() == null || dto.getUsername().isEmpty()){
+        if (dto.getUsername() == null || dto.getUsername().isEmpty()) {
             errors.put("username", "Username is required");
-        }else if(!dto.getUsername().matches("^[a-zA-Z0-9]+$")) {
+        } else if (!dto.getUsername().matches("^[a-zA-Z0-9]+$")) {
             errors.put("userName", "Username must not contain whitespace or special characters");
         }
-        if(dto.getEmail() == null || dto.getEmail().isEmpty()){
+        if (dto.getEmail() == null || dto.getEmail().isEmpty()) {
             errors.put("email", "Email is required");
         } else if (!dto.getEmail().matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")) {
             errors.put("email", "Invalid email format");
@@ -383,9 +428,9 @@ public class CustomerController {
         } else if (!dto.getDocumentNumber().matches("^C\\d{6,7}$")) {
             errors.put("documentNumber", "Document number must start with 'C' followed by 6 or 7 digits (e.g. C1234567)");
         }
-        if(dto.getExpiryDate() == null){
+        if (dto.getExpiryDate() == null) {
             errors.put("expiryDate", "Expiry date is required");
-        }else if(!dto.getExpiryDate().isAfter(LocalDate.now())) {
+        } else if (!dto.getExpiryDate().isAfter(LocalDate.now())) {
             errors.put("expiryDate", "Expiry date must be after today");
         }
         return errors;

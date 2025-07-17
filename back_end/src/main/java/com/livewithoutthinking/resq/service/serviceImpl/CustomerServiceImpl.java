@@ -3,6 +3,9 @@ package com.livewithoutthinking.resq.service.serviceImpl;
 import com.livewithoutthinking.resq.dto.UserDto;
 import com.livewithoutthinking.resq.entity.*;
 import com.livewithoutthinking.resq.mapper.UserMapper;
+import com.livewithoutthinking.resq.repository.BillRepository;
+import com.livewithoutthinking.resq.repository.RequestRescueRepository;
+import com.livewithoutthinking.resq.repository.UserRankRepository;
 import com.livewithoutthinking.resq.repository.UserRepository;
 import com.livewithoutthinking.resq.service.CustomerService;
 import com.livewithoutthinking.resq.service.UploadService;
@@ -15,7 +18,13 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private UserRepository customerRepository;
     @Autowired
-    private UploadService uploadService;
+    private RequestRescueRepository reqResQRepo;
+    @Autowired
+    private BillRepository billRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private UserRankService userRankService;
 
     public UserDto getCustomer(int customerId){
         User user = customerRepository.findById(customerId)
@@ -44,6 +53,19 @@ public class CustomerServiceImpl implements CustomerService {
         }
         customerRepository.save(user);
         return UserMapper.toDTO(user);
+    }
+
+    public void updateCustomerPoint(int rrId){
+        RequestRescue requestRescue = reqResQRepo.findById(rrId)
+                .orElseThrow(() -> new RuntimeException("RequestRescue not found"));
+        Bill bill = billRepository.findBillsByReqResQ(requestRescue.getRrid());
+        User user = userRepository.findUserById(requestRescue.getUser().getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        int newPoint = (int) (bill.getTotal() / 1000);
+        user.setLoyaltyPoint(newPoint+user.getLoyaltyPoint());
+
+        userRepository.save(user);
+        userRankService.updateUserRank(user.getUserId());
     }
 
 }

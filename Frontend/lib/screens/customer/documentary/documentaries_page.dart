@@ -124,7 +124,7 @@ class _DocumentariesPageState extends State<DocumentariesPage> {
               documents == null || documents!.isEmpty
                   ? const Center(
                 child: Text(
-                  "No document found",
+                  "No document",
                   style: TextStyle(
                     fontFamily: 'Lexend',
                     fontSize: 18,

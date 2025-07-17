@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   ///Profile///
-  // Get Customer Info
+  //Get Customer Info
   static Future<Map<String, dynamic>> getCustomerProfile(int customerId) async {
     final url = Uri.parse('$baseUrl/$customerId');
 
@@ -26,7 +26,7 @@ class ApiService {
     }
   }
 
-  // Update Customer Info
+  //Update Customer Info
   static Future<Map<String, dynamic>> updateCustomer(
     int customerId,
     Map<String, dynamic> customerDto,
@@ -89,7 +89,7 @@ class ApiService {
     }
   }
 
-  // Create New Vehicle
+  //Create New Vehicle
   static Future<Map<String, dynamic>> createVehicle({
     required int customerId,
     required String plateNo,
@@ -140,7 +140,7 @@ class ApiService {
     };
   }
 
-  // Update Vehicle
+  //Update Vehicle
   static Future<Map<String, dynamic>> updateVehicle({
     required int vehicleId,
     required int userId,
@@ -210,7 +210,7 @@ class ApiService {
     }
   }
 
-  // Delete Vehicle
+  //Delete Vehicle
   static Future<void> deleteVehicle(int vehicleId) async
   {
     final url = Uri.parse('$baseUrl/vehicles/$vehicleId');
@@ -239,7 +239,7 @@ class ApiService {
   }
 
   ///Personal Data///
-  // Get Personal Data
+  //Get Personal Data
   static Future<Map<String, dynamic>> getCustomerPersonalData(
     int customerId,
   ) async
@@ -272,7 +272,7 @@ class ApiService {
     }
   }
 
-  // Create New Personal Data
+  //Create New Personal Data
   static Future<Map<String, dynamic>> createPersonalData({
     required int customerId,
     required Map<String, dynamic> personalDataDto,
@@ -324,7 +324,7 @@ class ApiService {
     }
   }
 
-  // Update Personal Data
+  //Update Personal Data
   static Future<Map<String, dynamic>> updatePersonalData({
     required int pdId,
     required Map<String, dynamic> personalDataDto,
@@ -388,7 +388,7 @@ class ApiService {
   }
 
   ///Documents
-  // Get Personal Data
+  //Get Personal Data
   static Future<List<dynamic>> getCustomerDocuments(int customerId) async {
     final url = Uri.parse('$baseUrl/documents/$customerId');
     try {
@@ -412,7 +412,7 @@ class ApiService {
     }
   }
 
-  // Create Document
+  //Create Document
   static Future<Map<String, dynamic>> createDocument({
     required int customerId,
     required Map<String, dynamic> documentDto,
@@ -509,7 +509,7 @@ class ApiService {
     }
   }
 
-  // Delete Document
+  //Delete Document
   static Future<void> deleteDocument(int documentId) async
   {
     final url = Uri.parse('$baseUrl/documents/$documentId');
@@ -533,6 +533,93 @@ class ApiService {
       }
     } catch (e) {
       print("⚠️ Call API error: $e");
+    }
+  }
+
+  ///Discount
+  //Get App Discount
+  static Future<List<dynamic>> getAppDiscount(int customerId) async
+  {
+    final url = Uri.parse('$baseUrl/discounts/appDiscounts/$customerId');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Accept': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+        if (decoded is List) {
+          return decoded;
+        } else {
+          throw Exception('Expected List but got ${decoded.runtimeType}');
+        }
+      } else {
+        throw Exception('Server error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Connection error: $e');
+    }
+  }
+
+  //Get Rank Discount
+  static Future<List<dynamic>> getRankDiscount(int customerId) async
+  {
+    final url = Uri.parse('$baseUrl/discounts/rankDiscounts/$customerId');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Accept': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+        if (decoded is List) {
+          return decoded;
+        } else {
+          throw Exception('Expected List but got ${decoded.runtimeType}');
+        }
+      } else {
+        throw Exception('Server error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Connection error: $e');
+    }
+  }
+
+  //Get My Discount
+  static Future<List<dynamic>> getMyDiscount(int customerId) async
+  {
+    final url = Uri.parse('$baseUrl/discounts/myDiscounts/$customerId');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Accept': 'application/json'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+        if (decoded is List) {
+          return decoded;
+        } else {
+          throw Exception('Expected List but got ${decoded.runtimeType}');
+        }
+      } else {
+        throw Exception('Server error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Connection error: $e');
+    }
+  }
+
+  //Claim Discount
+  static Future<void> claimDiscount(int discountId, int userId) async {
+    final url = Uri.parse('$baseUrl/discounts/claimDiscount');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'discountId': discountId, 'userId': userId}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to claim discount: ${response.body}');
     }
   }
 }

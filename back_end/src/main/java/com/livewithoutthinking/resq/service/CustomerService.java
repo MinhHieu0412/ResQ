@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface CustomerService {
     UserDto getCustomer(int customerId);
     UserDto updateCustomer(UserDto dto);
+    void updateCustomerPoint(int rrId);
 }

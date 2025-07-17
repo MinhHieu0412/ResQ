@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:resq_app/services/auth_service.dart';
-import 'package:resq_app/models/auth/login_request.dart';
+import 'package:frontend/models/auth/login_request.dart';
+import 'package:frontend/screens/auth/verify_phone_screen.dart';
+import 'package:frontend/services/auth_service.dart';
 import '../customer/home_profile.dart';
-import './verify_phone_screen.dart';
 import 'package:flutter/services.dart';
 
 class LoginScreen extends StatefulWidget {
