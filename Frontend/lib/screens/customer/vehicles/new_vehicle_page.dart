@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/models/auth/login_response.dart';
 import 'package:frontend/services/customerAPI.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class NewVehiclePage extends StatefulWidget {
-  final int customerId;
-  const NewVehiclePage({super.key, required this.customerId});
+  const NewVehiclePage({super.key});
 
   @override
   State<NewVehiclePage> createState() => _NewVehiclePageState();
 }
 
 class _NewVehiclePageState extends State<NewVehiclePage> {
+  int? userId = loginResponse?.userId;
   final TextEditingController plateController = TextEditingController();
   final TextEditingController brandController = TextEditingController();
   final TextEditingController modelController = TextEditingController();
@@ -78,7 +79,7 @@ class _NewVehiclePageState extends State<NewVehiclePage> {
     final year = int.tryParse(yearController.text.trim());
 
     final result = await ApiService.createVehicle(
-      customerId: widget.customerId,
+      customerId: userId!,
       plateNo: plate,
       brand: brand,
       model: model,

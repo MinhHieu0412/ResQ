@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/auth/login_response.dart';
 import 'package:frontend/services/customerAPI.dart';
 
 class VehiclesPage extends StatefulWidget {
-  final int customerId;
 
-  const VehiclesPage({super.key, required this.customerId});
+  const VehiclesPage({super.key});
 
   @override
   State<VehiclesPage> createState() => _VehiclesPageState();
 }
 
 class _VehiclesPageState extends State<VehiclesPage> {
+  int? userId = loginResponse?.userId;
   List<dynamic>? vehicles;
   String? error;
   bool isLoading = true;
@@ -23,7 +24,7 @@ class _VehiclesPageState extends State<VehiclesPage> {
 
   Future<void> fetchVehicles() async {
     try {
-      final result = await ApiService.getCustomerVehicles(widget.customerId);
+      final result = await ApiService.getCustomerVehicles(userId!);
       setState(() {
         vehicles = result;
         isLoading = false;

@@ -10,6 +10,7 @@ import 'package:frontend/screens/customer/profile/profile_page.dart';
 import 'package:frontend/screens/customer/vehicles/new_vehicle_page.dart';
 import 'package:frontend/screens/customer/vehicles/vehicle_detail_page.dart';
 import 'package:frontend/screens/customer/vehicles/vehicles_page.dart';
+import 'package:frontend/screens/payment/PaymentPage.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -24,15 +25,16 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => LoginPage(),
-        '/profile': (context) => ProfilePage(customerId: 150),
-        '/newPersonalData': (context) => NewPersonalDataPage(customerId: 150),
+        '/profile': (context) => ProfilePage(),
+        '/newPersonalData': (context) => NewPersonalDataPage(),
         '/personalDataDetail': (context) =>
-            PersonalDataDetailPage(customerId: 150),
-        '/documentary': (context) => DocumentariesPage(customerId: 150),
-        '/newDocument': (context) => NewDocumentaryPage(customerId: 150),
-        '/vehicle': (context) => VehiclesPage(customerId: 150),
-        '/newVehicle': (context) => NewVehiclePage(customerId: 150),
+            PersonalDataDetailPage(),
+        '/documentary': (context) => DocumentariesPage(),
+        '/newDocument': (context) => NewDocumentaryPage(),
+        '/vehicle': (context) => VehiclesPage(),
+        '/newVehicle': (context) => NewVehiclePage(),
         '/discount': (context) => VouchersPage(),
+        '/payment' : (context) => PaymentPage(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/vehicleDetail') {
@@ -45,7 +47,7 @@ class MyApp extends StatelessWidget {
         if (settings.name == '/documentDetail') {
           final document = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-              builder: (context) => DocumentaryDetailPage(document: document, customerId: 150,)
+              builder: (context) => DocumentaryDetailPage(document: document)
           );
         }
 

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/auth/login_response.dart';
 import 'package:frontend/services/customerAPI.dart';
 
 class DocumentariesPage extends StatefulWidget {
-  final int customerId;
 
-  const DocumentariesPage({super.key, required this.customerId});
+  const DocumentariesPage({super.key});
 
   @override
   State<DocumentariesPage> createState() => _DocumentariesPageState();
 }
 
 class _DocumentariesPageState extends State<DocumentariesPage> {
+  int? userId = loginResponse?.userId;
   List<dynamic>? documents;
   String? error;
   bool isLoading = true;
@@ -24,7 +25,7 @@ class _DocumentariesPageState extends State<DocumentariesPage> {
   Future<void> fetchDocuments() async {
     try {
       final result = await ApiService.getCustomerDocuments(
-        widget.customerId,
+        userId!,
       );
       setState(() {
         documents = result;

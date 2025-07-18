@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/models/auth/login_response.dart';
 import 'package:frontend/services/customerAPI.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -7,11 +8,9 @@ import 'dart:io';
 import 'package:intl/intl.dart';
 
 class NewPersonalDataPage extends StatefulWidget {
-  final int customerId;
 
   const NewPersonalDataPage({
     super.key,
-    required this.customerId
   });
 
   @override
@@ -19,6 +18,7 @@ class NewPersonalDataPage extends StatefulWidget {
 }
 
 class _NewPersonalDataPageState extends State<NewPersonalDataPage> {
+  int? userId = loginResponse?.userId;
   late List<String> typeOptions;
   String? _selectedType;
 
@@ -160,7 +160,7 @@ class _NewPersonalDataPageState extends State<NewPersonalDataPage> {
     };
 
     final result = await ApiService.createPersonalData(
-      customerId: widget.customerId,
+      customerId: userId!,
       personalDataDto: dto,
       frontImage: _frontImage,
       backImage: _backImage,

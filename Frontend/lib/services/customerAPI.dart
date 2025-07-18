@@ -2,18 +2,24 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:frontend/config/constansts.dart';
+import 'package:frontend/models/auth/login_response.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
   ///Profile///
   //Get Customer Info
-  static Future<Map<String, dynamic>> getCustomerProfile(int customerId) async {
+  static Future<Map<String, dynamic>> getCustomerProfile(int customerId) async
+  {
+    String? token = loginResponse?.token;
     final url = Uri.parse('$baseUrl/$customerId');
 
     try {
       final response = await http.get(
         url,
-        headers: {'Accept': 'application/json'},
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -32,6 +38,7 @@ class ApiService {
     Map<String, dynamic> customerDto,
   ) async
   {
+    String? token = loginResponse?.token;
     final url = Uri.parse('$baseUrl/updateCustomer/$customerId');
     try {
       final response = await http.put(
@@ -39,6 +46,7 @@ class ApiService {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
         },
         body: jsonEncode(customerDto),
       );
@@ -68,11 +76,15 @@ class ApiService {
   // Get Customer Vehicle
   static Future<List<dynamic>> getCustomerVehicles(int customerId) async
   {
+    String? token = loginResponse?.token;
     final url = Uri.parse('$baseUrl/vehicles/$customerId');
     try {
       final response = await http.get(
         url,
-        headers: {'Accept': 'application/json'},
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -100,6 +112,7 @@ class ApiService {
     required File? backImage,
   }) async
   {
+    String? token = loginResponse?.token;
     final uri = Uri.parse('$baseUrl/vehicles/createNew');
     final vehicleDto = {
       "userId": customerId,
@@ -110,7 +123,8 @@ class ApiService {
     };
     final vehicleDtoString = jsonEncode(vehicleDto);
     final request = http.MultipartRequest('POST', uri)
-      ..fields['vehicleDtoString'] = vehicleDtoString;
+      ..fields['vehicleDtoString'] = vehicleDtoString
+      ..headers['Authorization'] ='Bearer $token';
 
     if (frontImage != null) {
       request.files.add(
@@ -152,6 +166,7 @@ class ApiService {
     File? backImage,
   }) async
   {
+    String? token = loginResponse?.token;
     final uri = Uri.parse('$baseUrl/vehicles/updateVehicle/$vehicleId');
 
     // Tạo MultipartRequest với method PUT
@@ -184,7 +199,8 @@ class ApiService {
       );
     }
 
-    request.headers['Accept'] = 'application/json';
+    request.headers.addAll({'Accept' : 'application/json',
+    'Authorization': 'Bearer $token'});
 
     try {
       final streamedResponse = await request.send();
@@ -213,14 +229,14 @@ class ApiService {
   //Delete Vehicle
   static Future<void> deleteVehicle(int vehicleId) async
   {
+    String? token = loginResponse?.token;
     final url = Uri.parse('$baseUrl/vehicles/$vehicleId');
-
     try {
       final response = await http.delete(
         url,
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': 'Bearer your_token', nếu có
+          'Authorization': 'Bearer $token'
         },
       );
 
@@ -244,11 +260,13 @@ class ApiService {
     int customerId,
   ) async
   {
+    String? token = loginResponse?.token;
     final url = Uri.parse('$baseUrl/personaldata/$customerId');
     try {
       final response = await http.get(
         url,
-        headers: {'Accept': 'application/json'},
+        headers: {'Accept': 'application/json',
+          'Authorization': 'Bearer $token'},
       );
       print(response);
 
@@ -281,6 +299,7 @@ class ApiService {
     required File? faceImage,
   }) async
   {
+    String? token = loginResponse?.token;
     final uri = Uri.parse('$baseUrl/personaldata/createNew');
     try {
       final personalDataDtoString = jsonEncode(personalDataDto);
@@ -288,7 +307,10 @@ class ApiService {
           http.MultipartRequest('POST', uri)
             ..fields['personalDataString'] = personalDataDtoString
             ..fields['userId'] = customerId.toString()
-            ..headers['Content-Type'] = 'multipart/form-data';
+            ..headers.addAll({
+              'Content-Type': 'multipart/form-data',
+              'Authorization': 'Bearer $token',
+            });
 
       if (frontImage != null) {
         request.files.add(
@@ -333,6 +355,7 @@ class ApiService {
     required dynamic faceImage,
   }) async
   {
+    String? token = loginResponse?.token;
     final uri = Uri.parse('$baseUrl/personaldata/updatePd/${pdId}');
     try {
       print("PD ID $pdId");
@@ -345,24 +368,34 @@ class ApiService {
           http.MultipartRequest('PUT', uri)
             ..fields['pdId'] = pdId.toString()
             ..fields['personalDataDtoString'] = personalDataDtoString
-            ..headers['Accept'] = 'application/json';
+            ..headers.addAll({
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            });
 
       if (frontImage != null) {
         if (frontImage is File) {
-          request.files.add(await http.MultipartFile.fromPath('frontImage', frontImage.path));
+          request.files.add(
+            await http.MultipartFile.fromPath('frontImage', frontImage.path),
+          );
         } else if (frontImage is String) {
           request.fields['frontImageUrl'] = frontImage; // URL cũ
         }
-      }if (backImage != null) {
+      }
+      if (backImage != null) {
         if (backImage is File) {
-          request.files.add(await http.MultipartFile.fromPath('backImage', backImage.path));
+          request.files.add(
+            await http.MultipartFile.fromPath('backImage', backImage.path),
+          );
         } else if (backImage is String) {
           request.fields['backImageUrl'] = backImage; // URL cũ
         }
       }
       if (faceImage != null) {
         if (faceImage is File) {
-          request.files.add(await http.MultipartFile.fromPath('faceImage', faceImage.path));
+          request.files.add(
+            await http.MultipartFile.fromPath('faceImage', faceImage.path),
+          );
         } else if (faceImage is String) {
           request.fields['faceImageUrl'] = frontImage; // URL cũ
         }
@@ -389,12 +422,17 @@ class ApiService {
 
   ///Documents
   //Get Personal Data
-  static Future<List<dynamic>> getCustomerDocuments(int customerId) async {
+  static Future<List<dynamic>> getCustomerDocuments(int customerId) async
+  {
+    String? token = loginResponse?.token;
     final url = Uri.parse('$baseUrl/documents/$customerId');
     try {
       final response = await http.get(
         url,
-        headers: {'Accept': 'application/json'},
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -420,6 +458,7 @@ class ApiService {
     required File? backImage,
   }) async
   {
+    String? token = loginResponse?.token;
     final uri = Uri.parse('$baseUrl/documents/createNew');
     try {
       final documentDtoString = jsonEncode(documentDto);
@@ -427,7 +466,10 @@ class ApiService {
           http.MultipartRequest('POST', uri)
             ..fields['documentString'] = documentDtoString
             ..fields['userIdString'] = customerId.toString()
-            ..headers['Content-Type'] = 'multipart/form-data';
+            ..headers.addAll({
+              'Content-Type': 'multipart/form-data',
+              'Authorization': 'Bearer $token',
+            });
 
       if (frontImage != null) {
         request.files.add(
@@ -466,6 +508,7 @@ class ApiService {
     required dynamic backImage,
   }) async
   {
+    String? token = loginResponse?.token;
     final uri = Uri.parse('$baseUrl/documents/updateDocument/${documentId}');
     try {
       final documentDtoString = jsonEncode(documentDto);
@@ -473,18 +516,25 @@ class ApiService {
           http.MultipartRequest('PUT', uri)
             ..fields['sDocumentId'] = documentId.toString()
             ..fields['documentDtoString'] = documentDtoString
-            ..headers['Accept'] = 'application/json';
+            ..headers.addAll({
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            });
 
       if (frontImage != null) {
         if (frontImage is File) {
-          request.files.add(await http.MultipartFile.fromPath('frontImage', frontImage.path));
+          request.files.add(
+            await http.MultipartFile.fromPath('frontImage', frontImage.path),
+          );
         } else if (frontImage is String) {
           request.fields['frontImageUrl'] = frontImage; // URL cũ
         }
       }
       if (backImage != null) {
         if (backImage is File) {
-          request.files.add(await http.MultipartFile.fromPath('backImage', backImage.path));
+          request.files.add(
+            await http.MultipartFile.fromPath('backImage', backImage.path),
+          );
         } else if (backImage is String) {
           request.fields['backImageUrl'] = backImage;
         }
@@ -512,13 +562,14 @@ class ApiService {
   //Delete Document
   static Future<void> deleteDocument(int documentId) async
   {
+    String? token = loginResponse?.token;
     final url = Uri.parse('$baseUrl/documents/$documentId');
     try {
       final response = await http.delete(
         url,
         headers: {
           'Content-Type': 'application/json',
-          // 'Authorization': 'Bearer your_token', nếu có
+          'Authorization': 'Bearer your_token',
         },
       );
 
@@ -540,11 +591,15 @@ class ApiService {
   //Get App Discount
   static Future<List<dynamic>> getAppDiscount(int customerId) async
   {
+    String? token = loginResponse?.token;
     final url = Uri.parse('$baseUrl/discounts/appDiscounts/$customerId');
     try {
       final response = await http.get(
         url,
-        headers: {'Accept': 'application/json'},
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -564,11 +619,15 @@ class ApiService {
   //Get Rank Discount
   static Future<List<dynamic>> getRankDiscount(int customerId) async
   {
+    String? token = loginResponse?.token;
     final url = Uri.parse('$baseUrl/discounts/rankDiscounts/$customerId');
     try {
       final response = await http.get(
         url,
-        headers: {'Accept': 'application/json'},
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -586,13 +645,16 @@ class ApiService {
   }
 
   //Get My Discount
-  static Future<List<dynamic>> getMyDiscount(int customerId) async
-  {
+  static Future<List<dynamic>> getMyDiscount(int customerId) async {
+    String? token = loginResponse?.token;
     final url = Uri.parse('$baseUrl/discounts/myDiscounts/$customerId');
     try {
       final response = await http.get(
         url,
-        headers: {'Accept': 'application/json'},
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -611,15 +673,40 @@ class ApiService {
 
   //Claim Discount
   static Future<void> claimDiscount(int discountId, int userId) async {
+    String? token = loginResponse?.token;
     final url = Uri.parse('$baseUrl/discounts/claimDiscount');
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
       body: jsonEncode({'discountId': discountId, 'userId': userId}),
     );
 
     if (response.statusCode != 200) {
       throw Exception('Failed to claim discount: ${response.body}');
+    }
+  }
+
+  ///Payment
+  //User Pay
+  static Future<String?> createUserPayment(int rrId) async {
+    final url = Uri.parse('$paymentUrl/pay-rescue?rrId=$rrId');
+
+    try {
+      final response = await http.post(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['approveUrl']; // link để redirect qua PayPal
+      } else {
+        final error = jsonDecode(response.body)['error'];
+        throw Exception(error ?? 'Cannot create payment.');
+      }
+    } catch (e) {
+      print("Lỗi khi gọi PayPal: $e");
+      return null;
     }
   }
 }

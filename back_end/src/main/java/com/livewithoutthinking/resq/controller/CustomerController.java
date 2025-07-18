@@ -335,6 +335,7 @@ public class CustomerController {
         return ResponseEntity.ok("Claimed successfully");
     }
 
+
     //Support
     private <T> ResponseEntity<T> ok(T body) {
         return ResponseEntity.ok(body);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frontend/config/constansts.dart';
+import 'package:frontend/models/auth/login_response.dart';
 import 'package:frontend/services/customerAPI.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -8,12 +9,10 @@ import 'dart:io';
 import 'package:intl/intl.dart';
 
 class PersonalDataDetailPage extends StatefulWidget {
-  final int customerId;
   final Map<String, dynamic>? personalData;
 
   const PersonalDataDetailPage({
     super.key,
-    required this.customerId,
     this.personalData,
   });
 
@@ -22,6 +21,7 @@ class PersonalDataDetailPage extends StatefulWidget {
 }
 
 class _PersonalDataDetailPageState extends State<PersonalDataDetailPage> {
+  int? userId = loginResponse?.userId;
   late List<String> typeOptions;
   String? _selectedType;
 
@@ -99,7 +99,7 @@ class _PersonalDataDetailPageState extends State<PersonalDataDetailPage> {
   }
 
   Future<void> _fetchPersonalData() async {
-    final result = await ApiService.getCustomerPersonalData(widget.customerId);
+    final result = await ApiService.getCustomerPersonalData(userId!);
     if (result != null && mounted) {
       _populateInitialData(result);
     }

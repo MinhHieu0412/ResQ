@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/config/constansts.dart';
+import 'package:frontend/models/auth/login_response.dart';
 import 'package:frontend/services/customerAPI.dart';
 import 'package:intl/intl.dart';
 
 class ProfilePage extends StatefulWidget {
-  final int customerId;
 
-  const ProfilePage({super.key, required this.customerId});
+  const ProfilePage({super.key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  int? userId = loginResponse?.userId;
   Map<String, dynamic>? customer;
   String? error;
   bool isLoading = true;
@@ -42,7 +43,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> fetchCustomer() async {
     try {
-      final result = await ApiService.getCustomerProfile(widget.customerId);
+      final result = await ApiService.getCustomerProfile(userId!);
       setState(() {
         customer = result;
         usernameController.text = result['username'] ?? '';
@@ -156,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
     };
 
     try {
-      final result = await ApiService.updateCustomer(widget.customerId, dto);
+      final result = await ApiService.updateCustomer(userId!, dto);
       print("Result: $result");
       if (!result.containsKey("errors")) {
         return true;

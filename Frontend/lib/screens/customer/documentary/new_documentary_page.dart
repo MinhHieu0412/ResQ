@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/models/auth/login_response.dart';
 import 'package:frontend/services/customerAPI.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
 
 class NewDocumentaryPage extends StatefulWidget {
-  final int customerId;
 
-  const NewDocumentaryPage({super.key, required this.customerId});
+  const NewDocumentaryPage({super.key});
 
   @override
   State<NewDocumentaryPage> createState() => _NewDocumentaryPageState();
 }
 
 class _NewDocumentaryPageState extends State<NewDocumentaryPage> {
+  int? userId = loginResponse?.userId;
   List<dynamic> vehicles = [];
   int? selectedVehicleId;
 
@@ -37,7 +38,7 @@ class _NewDocumentaryPageState extends State<NewDocumentaryPage> {
 
   Future<void> fetchVehicles() async {
     try {
-      final result = await ApiService.getCustomerVehicles(widget.customerId);
+      final result = await ApiService.getCustomerVehicles(userId!);
       setState(() {
         vehicles = result;
         if (vehicles.isNotEmpty && vehicles[0]['vehicleId'] != null) {
@@ -144,7 +145,7 @@ class _NewDocumentaryPageState extends State<NewDocumentaryPage> {
     };
 
     final result = await ApiService.createDocument(
-      customerId: widget.customerId,
+      customerId: userId!,
       documentDto: dto,
       frontImage: _frontImage,
       backImage: _backImage,

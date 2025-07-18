@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/models/auth/login_response.dart';
 import 'package:frontend/services/customerAPI.dart';
 import 'package:frontend/config/constansts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,12 +9,10 @@ import 'package:intl/intl.dart';
 
 class DocumentaryDetailPage extends StatefulWidget {
   final Map<String, dynamic> document;
-  final int customerId;
 
   const DocumentaryDetailPage({
     super.key,
-    required this.document,
-    required this.customerId,
+    required this.document
   });
 
   @override
@@ -21,6 +20,7 @@ class DocumentaryDetailPage extends StatefulWidget {
 }
 
 class _DocumentaryDetailPageState extends State<DocumentaryDetailPage> {
+  int? userId = loginResponse?.userId;
   List<dynamic> vehicles = [];
   int? selectedVehicleId;
 
@@ -80,7 +80,7 @@ class _DocumentaryDetailPageState extends State<DocumentaryDetailPage> {
 
   Future<void> fetchVehicles() async {
     try {
-      final result = await ApiService.getCustomerVehicles(widget.customerId);
+      final result = await ApiService.getCustomerVehicles(userId!);
       setState(() {
         vehicles = result;
         final match = vehicles.firstWhere(

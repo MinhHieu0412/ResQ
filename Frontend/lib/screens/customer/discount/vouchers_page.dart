@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/models/auth/login_response.dart';
 import 'package:frontend/services/customerAPI.dart';
 import 'package:intl/intl.dart';
 
@@ -11,7 +12,7 @@ class VouchersPage extends StatefulWidget {
 
 class _VouchersPageState extends State<VouchersPage>
     with SingleTickerProviderStateMixin {
-  final int customerId = 150;
+  int? userId = loginResponse?.userId;
   late TabController _tabController;
   final List<String> _tabTitles = [
     "App discounts",
@@ -47,7 +48,7 @@ class _VouchersPageState extends State<VouchersPage>
       _error = null;
     });
     try {
-      final data = await ApiService.getAppDiscount(customerId);
+      final data = await ApiService.getAppDiscount(userId!);
       setState(() {
         _appDiscounts = data;
       });
@@ -68,7 +69,7 @@ class _VouchersPageState extends State<VouchersPage>
       _error = null;
     });
     try {
-      final data = await ApiService.getRankDiscount(customerId);
+      final data = await ApiService.getRankDiscount(userId!);
       setState(() {
         _rankDiscounts = data;
       });
@@ -89,7 +90,7 @@ class _VouchersPageState extends State<VouchersPage>
       _error = null;
     });
     try {
-      final data = await ApiService.getMyDiscount(customerId);
+      final data = await ApiService.getMyDiscount(userId!);
       setState(() {
         _myDiscounts = data;
       });
@@ -105,10 +106,8 @@ class _VouchersPageState extends State<VouchersPage>
   }
 
   Future<void> _claimDiscount(int discountId) async {
-    print("Customer ID: $customerId");
-    print("Discount ID: $discountId");
     try {
-      await ApiService.claimDiscount(discountId, customerId);
+      await ApiService.claimDiscount(discountId, userId!);
       _showDialog("Claim Success", "You have claimed new discount!");
       _fetchAppDiscounts();
       _fetchRankDiscounts();

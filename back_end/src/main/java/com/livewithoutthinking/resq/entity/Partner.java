@@ -3,6 +3,7 @@ package com.livewithoutthinking.resq.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -45,5 +46,7 @@ public class Partner {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt; // Thời gian cập nhật đối tác
 
+    @Column(name = "WalletAmount", precision = 10, scale = 2)
+    private BigDecimal walletAmount = BigDecimal.ZERO;
     // Constructor, Getters, Setters và các phương thức khác nếu cần
 }
