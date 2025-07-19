@@ -2,11 +2,12 @@
 
 * Thêm vào pubspec.yaml 
 	
-  permission_handler: ^12.0.0+1
-  device_info_plus: ^11.5.0
-  http: ^0.13.6
-  intl: ^0.18.1
-  image_picker: ^1.1.2
+  permission_handler
+  device_info_plus
+  http
+  intl
+  image_picker
+  webview_flutter
   
   Lấy sử dụng font và icons ở cuối file 
  
@@ -23,3 +24,42 @@
  Hiện tại đang hiển thị frontend là do tên project
 
 * Ở main route đang gán id của customer cố định, cần truyền vào
+
+*flutter pub add flutter_dotenv
+	
+*Chỉnh toDto ở DocumentServiceImpl
+
+*Folder static > Rank data
+
+*Khi tạo mới User thành công > auto tạo 1 dòng trong UserRank || UserRankService.createUserRank(userId)
+*Khi kết thúc chuyến > auto gọi update điểm user (có kiểm tra rank) || CustomerService.updateCustomerPoint(rrId)
+
+*Remove hết hạn: khi dùng discount xong trừ SL > check quantity = 0 gọi UserDiscount.removeExpiredDiscounts(discountId)
+
+
+AndroidManifest
+
+<!-- INTERNET -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- CAMERA -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- LOCATION -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- IMAGE -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+	
+	trong queries:
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>

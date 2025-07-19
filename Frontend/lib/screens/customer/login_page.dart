@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frontend/screens/payment/PaymentPage.dart';
+import 'package:frontend/screens/payment/payment_page.dart';
 import 'package:frontend/services/customerAPI.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -139,11 +139,20 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                 : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    //TEST PAYMENT
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/payment');
                       },
                       child: const Text('Payment'),
+                    ),
+                    const SizedBox(height: 10),
+                    //DANH SÁCH PAYMENT
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/payments');
+                      },
+                      child: const Text('Payments'),
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(

@@ -2,10 +2,7 @@ package com.livewithoutthinking.resq.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.livewithoutthinking.resq.dto.DocumentaryDto;
-import com.livewithoutthinking.resq.dto.PersonalDataDto;
-import com.livewithoutthinking.resq.dto.UserDto;
-import com.livewithoutthinking.resq.dto.VehicleDto;
+import com.livewithoutthinking.resq.dto.*;
 import com.livewithoutthinking.resq.helpers.ApiResponse;
 import com.livewithoutthinking.resq.service.*;
 import com.livewithoutthinking.resq.service.serviceImpl.UserRankService;
@@ -46,6 +43,8 @@ public class CustomerController {
     private DiscountService discountService;
     @Autowired
     private UserRankService userRankService;
+    @Autowired
+    private PaymentService paymentService;
 
     // Profile
     @GetMapping("/{customerId}")
@@ -335,6 +334,73 @@ public class CustomerController {
         return ResponseEntity.ok("Claimed successfully");
     }
 
+    //Payment
+    @GetMapping("/payments/{userId}")
+    public ResponseEntity<?> getPayments(@PathVariable("userId") int userId) {
+        try {
+            return ok(paymentService.appPayments(userId));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping("/payments/createNew/{userId}")
+    public ResponseEntity<?> createPayment(@PathVariable("userId") int userId,
+                                           @RequestParam String paymentDtoString) {
+        try{
+            PaymentDto paymentDto = objectMapper.readValue(paymentDtoString, PaymentDto.class);
+
+            Map<String, String> errors = validatePayment(paymentDto);
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
+            }
+            return ok(paymentService.createPayment(userId, paymentDto));
+        }catch(Exception e){
+            return ResponseEntity.internalServerError().body(
+                    Map.of("error", "System error: " + e.getMessage())
+            );
+        }
+    }
+
+    @PutMapping("/payments/updatePayment/{sPaymentId}")
+    public ResponseEntity<?> updatePayment(@PathVariable("sPaymentId") String sPaymentId,
+                                           @RequestPart String paymentDtoString) {
+        try{
+            PaymentDto paymentDto = objectMapper.readValue(paymentDtoString, PaymentDto.class);
+            Integer paymentId = Integer.parseInt(sPaymentId);
+            if (paymentDto.getPaymentId() != paymentId) {
+                paymentDto.setPaymentId(paymentId);
+            }
+            Map<String, String> errors = validatePayment(paymentDto);
+            if (!errors.isEmpty()) {
+                return ResponseEntity.badRequest().body(ApiResponse.badRequest(errors));
+            }
+            return ok(paymentService.updatePayment(paymentDto));
+        }catch(Exception e){
+            return ResponseEntity.internalServerError().body(
+                    Map.of("error", "System error: " + e.getMessage())
+            );
+        }
+    }
+
+    @DeleteMapping("/payments/{paymentId}")
+    public ResponseEntity<?> deletePayment(@PathVariable("paymentId") int paymentId) {
+        try {
+            System.out.println(paymentId);
+            paymentService.deletePayment(paymentId);
+            System.out.println("Through");
+            return ResponseEntity.ok(Map.of("message", "Deleted payment sucessfully"));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "ID is invalid: " + e.getMessage())
+            );
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    Map.of("error", "System error: " + e.getMessage())
+            );
+        }
+    }
+
 
     //Support
     private <T> ResponseEntity<T> ok(T body) {
@@ -433,6 +499,19 @@ public class CustomerController {
             errors.put("expiryDate", "Expiry date is required");
         } else if (!dto.getExpiryDate().isAfter(LocalDate.now())) {
             errors.put("expiryDate", "Expiry date must be after today");
+        }
+        return errors;
+    }
+
+    private Map<String, String> validatePayment(PaymentDto paymentDto) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        if(paymentDto.getPaypalEmail() == null || paymentDto.getPaypalEmail().isEmpty()) {
+            errors.put("paypalEmail", "Paypal email is required");
+        } else if (!paymentDto.getPaypalEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            errors.put("paypalEmail", "Invalid Paypal email format");
+        }
+        if(paymentDto.getName()!=null && paymentDto.getName().isEmpty()){
+            errors.put("name", "Name is required");
         }
         return errors;
     }

@@ -10,8 +10,12 @@ import 'package:frontend/screens/customer/profile/profile_page.dart';
 import 'package:frontend/screens/customer/vehicles/new_vehicle_page.dart';
 import 'package:frontend/screens/customer/vehicles/vehicle_detail_page.dart';
 import 'package:frontend/screens/customer/vehicles/vehicles_page.dart';
-import 'package:frontend/screens/payment/PaymentPage.dart';
+import 'package:frontend/screens/payment/new_payment_page.dart';
+import 'package:frontend/screens/payment/payment_detail_page.dart';
+import 'package:frontend/screens/payment/payment_page.dart';
+import 'package:frontend/screens/payment/payments_page.dart';
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -34,7 +38,9 @@ class MyApp extends StatelessWidget {
         '/vehicle': (context) => VehiclesPage(),
         '/newVehicle': (context) => NewVehiclePage(),
         '/discount': (context) => VouchersPage(),
-        '/payment' : (context) => PaymentPage(),
+        '/payments' : (context) => PaymentsPage(),
+        '/newPayment' : (context) => NewPayemtPage(),
+        '/payment' : (context) => PaymentPage(), //Bỏ khi ghép payment xong
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/vehicleDetail') {
@@ -48,6 +54,14 @@ class MyApp extends StatelessWidget {
           final document = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
               builder: (context) => DocumentaryDetailPage(document: document)
+          );
+        }
+
+
+        if (settings.name == '/paymentDetail') {
+          final payment = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+              builder: (context) => PaymentDetailPage(payment: payment)
           );
         }
 

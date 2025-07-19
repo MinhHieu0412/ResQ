@@ -689,24 +689,140 @@ class ApiService {
     }
   }
 
-  ///Payment
-  //User Pay
-  static Future<String?> createUserPayment(int rrId) async {
-    final url = Uri.parse('$paymentUrl/pay-rescue?rrId=$rrId');
 
+  ///Payments
+  //Get Payments
+  static Future<List<dynamic>> getPayments(int customerId) async
+  {
+    String? token = loginResponse?.token;
+    final url = Uri.parse('$baseUrl/payments/$customerId');
     try {
-      final response = await http.post(url);
+      final response = await http.get(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+        print(decoded);
+        if (decoded is List) {
+          return decoded;
+        } else {
+          throw Exception('Expected List but got ${decoded.runtimeType}');
+        }
+      } else {
+        throw Exception('Server error: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Connection error: $e');
+    }
+  }
+
+  //Create Document
+  static Future<Map<String, dynamic>> createPayment({
+    required int customerId,
+    required Map<String, dynamic> paymentDto,
+  }) async
+  {
+    String? token = loginResponse?.token;
+    final uri = Uri.parse('$baseUrl/payments/createNew/$customerId');
+    try {
+      final paymentDtoString = jsonEncode(paymentDto);
+      print(paymentDtoString);
+      final request =
+      http.MultipartRequest('POST', uri)
+        ..fields['paymentDtoString'] = paymentDtoString
+        ..headers.addAll({
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        });
+
+
+      final response = await request.send();
+      final respStr = await response.stream.bytesToString();
+      Map<String, dynamic> parsedBody = {};
+      try {
+        parsedBody = jsonDecode(respStr);
+      } catch (_) {
+        // Nếu không decode được thì để parsedBody rỗng
+      }
+      return {
+        "status": response.statusCode,
+        "success": response.statusCode == 200,
+        "body": respStr,
+        "errors": parsedBody["errors"] is Map ? parsedBody["errors"] : {},
+      };
+    } catch (e) {
+      throw Exception('Connection error: $e');
+    }
+  }
+
+  //Update Payment
+  static Future<Map<String, dynamic>> updatePayment({
+    required int paymentId,
+    required Map<String, dynamic> paymentDto,
+  }) async
+  {
+    String? token = loginResponse?.token;
+    final uri = Uri.parse('$baseUrl/payments/updatePayment/${paymentId}');
+    try {
+      final paymentDtoString = jsonEncode(paymentDto);
+      final request =
+      http.MultipartRequest('PUT', uri)
+        ..fields['paymentDtoString'] = paymentDtoString
+        ..headers.addAll({
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        });
+
+      final response = await request.send();
+      final respStr = await response.stream.bytesToString();
+      Map<String, dynamic> parsedBody = {};
+      try {
+        parsedBody = jsonDecode(respStr);
+      } catch (_) {
+        // Nếu không decode được thì để parsedBody rỗng
+      }
+      return {
+        "status": response.statusCode,
+        "success": response.statusCode == 200,
+        "body": respStr,
+        "errors": parsedBody["errors"] is Map ? parsedBody["errors"] : {},
+      };
+    } catch (e) {
+      throw Exception('Connection error: $e');
+    }
+  }
+
+  //Delete Payment
+  static Future<void> deletePayment(int paymentId) async
+  {
+    String? token = loginResponse?.token;
+    final url = Uri.parse('$baseUrl/payments/$paymentId');
+    print(url);
+    print(paymentId);
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer your_token',
+        },
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return data['approveUrl']; // link để redirect qua PayPal
+        print("Delete sucess: ${data['message']}");
+      } else if (response.statusCode == 204) {
+        print("Delete sucess (no content)");
       } else {
-        final error = jsonDecode(response.body)['error'];
-        throw Exception(error ?? 'Cannot create payment.');
+        print("❌ Delete Fail: ${response.statusCode}");
+        print("Fail: ${response.body}");
       }
     } catch (e) {
-      print("Lỗi khi gọi PayPal: $e");
-      return null;
+      print("⚠️ Call API error: $e");
     }
   }
 }
