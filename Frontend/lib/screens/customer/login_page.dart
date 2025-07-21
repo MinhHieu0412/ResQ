@@ -142,6 +142,13 @@ class _LoginPageState extends State<LoginPage> with WidgetsBindingObserver {
                     //TEST PAYMENT
                     ElevatedButton(
                       onPressed: () {
+                        Navigator.pushNamed(context, '/ranks');
+                      },
+                      child: const Text('Rank'),
+                    ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
                         Navigator.pushNamed(context, '/payment');
                       },
                       child: const Text('Payment'),

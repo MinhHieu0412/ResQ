@@ -7,6 +7,7 @@ import 'package:frontend/screens/customer/login_page.dart';
 import 'package:frontend/screens/customer/personalData/new_personal_data_page.dart';
 import 'package:frontend/screens/customer/personalData/personal_data_detail_page.dart';
 import 'package:frontend/screens/customer/profile/profile_page.dart';
+import 'package:frontend/screens/customer/ranks_info_page.dart';
 import 'package:frontend/screens/customer/vehicles/new_vehicle_page.dart';
 import 'package:frontend/screens/customer/vehicles/vehicle_detail_page.dart';
 import 'package:frontend/screens/customer/vehicles/vehicles_page.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         '/vehicle': (context) => VehiclesPage(),
         '/newVehicle': (context) => NewVehiclePage(),
         '/discount': (context) => VouchersPage(),
+        '/ranks': (context) => RanksInfoPage(),
         '/payments' : (context) => PaymentsPage(),
         '/newPayment' : (context) => NewPayemtPage(),
         '/payment' : (context) => PaymentPage(), //Bỏ khi ghép payment xong
